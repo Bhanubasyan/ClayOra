@@ -1,0 +1,48 @@
+.success-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+}
+
+.success-card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  padding: 50px;
+  border-radius: 25px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: pop 0.6s ease;
+}
+
+.success-card h1 {
+  margin-bottom: 15px;
+}
+
+.success-card button {
+  margin-top: 20px;
+  padding: 12px 30px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.success-card button:hover {
+  transform: scale(1.05);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

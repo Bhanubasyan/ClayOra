@@ -1,0 +1,90 @@
+.product-detail-container {
+  padding: 60px;
+  background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+  min-height: 100vh;
+  color: white;
+}
+
+.product-detail-card {
+  display: flex;
+  gap: 50px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.product-image img {
+  width: 400px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-info h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.price {
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+.desc {
+  margin-bottom: 20px;
+  color: #ddd;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.quantity-control button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: linear-gradient(45deg, #000, #333);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.quantity-control span {
+  margin: 0 15px;
+  font-weight: 600;
+}
+
+.add-btn {
+  padding: 12px 30px;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
+  border: none;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.stock {
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .product-detail-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: auto;
+  }
+}

@@ -1,0 +1,26 @@
+.checkout-container {
+  padding: 50px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+  color: white;
+}
+
+.checkout-item {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.checkout-container button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
+  border: none;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+}
