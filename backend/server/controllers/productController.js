@@ -92,6 +92,7 @@ exports.seedProducts = async (req, res) => {
         category: i % 2 === 0 ? "Pottery" : "Wood",
         stock: Math.floor(Math.random() * 50) + 1,
         image: "https://example.com/product.jpg",
+        seller: req.user._id,   // 🔥 VERY IMPORTANT
       });
     }
 
@@ -106,7 +107,6 @@ exports.seedProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // @desc    Get Single Product
 // @route   GET /api/products/:id

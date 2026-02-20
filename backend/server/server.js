@@ -30,7 +30,7 @@ app.use(
       "http://localhost:3000",
       "https://full-stack-ecommerce-marketplace-4k46kq0fi.vercel.app",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    
     credentials: true,
   })
 );
