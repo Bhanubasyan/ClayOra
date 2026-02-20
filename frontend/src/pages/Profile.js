@@ -48,6 +48,25 @@ function Profile() {
     }
   };
 
+  // ✅ CANCEL ORDER FUNCTION
+  const cancelOrder = async (orderId) => {
+    try {
+      await API.put(`/orders/cancel/${orderId}`);
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId
+            ? { ...order, isCancelled: true }
+            : order
+        )
+      );
+
+      alert("Order cancelled successfully!");
+    } catch (error) {
+      alert("Failed to cancel order");
+    }
+  };
+
   if (!user) return <h2 style={{ color: "white" }}>Loading...</h2>;
 
   return (
@@ -77,7 +96,6 @@ function Profile() {
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Address"
               />
-
               <button onClick={saveChanges}>Save</button>
             </>
           ) : (
@@ -104,16 +122,31 @@ function Profile() {
         ) : (
           orders.map((order) => (
             <div key={order._id} className="order-card">
+
               <div>
                 <p><strong>Order ID:</strong> {order._id}</p>
-                <p>
-                  <strong>Total:</strong> ₹ {order.totalPrice || 0}
-                </p>
+                <p><strong>Total:</strong> ₹ {order.totalAmount}</p>
               </div>
 
-              <div className={`order-status ${order.isDelivered ? "delivered" : "processing"}`}>
-                {order.isDelivered ? "Delivered" : "Processing"}
+              <div className="order-actions">
+
+                <div className={`order-status`}>
+                  {order.status}
+                </div>
+
+                {/* Cancel Button */}
+                {order.status !== "Delivered" &&
+                  order.status !== "Cancelled" && (
+                    <button
+                      className="cancel-btn"
+                      onClick={() => cancelOrder(order._id)}
+                    >
+                      Cancel Order
+                    </button>
+                  )}
+
               </div>
+
             </div>
           ))
         )}

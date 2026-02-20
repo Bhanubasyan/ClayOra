@@ -53,42 +53,56 @@ const navigate = useNavigate();
       <h2 className="cart-title">Your Cart</h2>
 
       {cart.items.map((item) => (
-        <div className="cart-card" key={item.product._id}>
-          <div className="cart-left">
-            <img src={potteryImg} alt={item.product.name} />
-          </div>
+  <div className="cart-card" key={item.product._id}>
+    <div className="cart-left">
+      <img src={potteryImg} alt={item.product.name} />
+    </div>
 
-          <div className="cart-middle">
-            <h4>{item.product.name}</h4>
-            <p>₹ {item.product.price}</p>
+    <div className="cart-middle">
+      <h4>{item.product.name}</h4>
+      <p>₹ {item.product.price}</p>
 
-            <div className="qty-controls">
-              <button onClick={() =>
-                updateQuantity(item.product._id, item.quantity - 1)
-              }>
-                -
-              </button>
+      {/* 🔥 STOCK INFO */}
+      {item.product.stock > 0 ? (
+        <p className="stock-info">
+          Available: {item.product.stock}
+        </p>
+      ) : (
+        <p className="out-stock">Out of Stock</p>
+      )}
 
-              <span>{item.quantity}</span>
+      <div className="qty-controls">
+        <button
+          onClick={() =>
+            updateQuantity(item.product._id, item.quantity - 1)
+          }
+        >
+          -
+        </button>
 
-              <button onClick={() =>
-                updateQuantity(item.product._id, item.quantity + 1)
-              }>
-                +
-              </button>
-            </div>
-          </div>
+        <span>{item.quantity}</span>
 
-          <div className="cart-right">
-            <button
-              className="remove-btn"
-              onClick={() => removeItem(item.product._id)}
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ))}
+        <button
+          onClick={() =>
+            updateQuantity(item.product._id, item.quantity + 1)
+          }
+          disabled={item.quantity >= item.product.stock}
+        >
+          +
+        </button>
+      </div>
+    </div>
+
+    <div className="cart-right">
+      <button
+        className="remove-btn"
+        onClick={() => removeItem(item.product._id)}
+      >
+        Remove
+      </button>
+    </div>
+  </div>
+))}
 
       <div className="cart-summary">
         <h3>Total: ₹ {total}</h3>

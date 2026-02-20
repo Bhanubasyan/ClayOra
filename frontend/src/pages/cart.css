@@ -9,6 +9,24 @@
   margin-bottom: 30px;
 }
 
+.stock-info {
+  font-size: 14px;
+  color: #4caf50;
+  margin-top: 5px;
+}
+
+.out-stock {
+  font-size: 14px;
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.qty-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .cart-card {
   display: flex;
   align-items: center;

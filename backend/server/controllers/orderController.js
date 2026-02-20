@@ -7,7 +7,8 @@ const Product = require("../models/Product");
 // @access Private
 exports.createOrder = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+    const cart = await Cart.findOne({ user: req.user._id })
+      .populate("items.product");
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
@@ -17,9 +18,11 @@ exports.createOrder = async (req, res) => {
     const orderItems = [];
 
     for (let item of cart.items) {
+
+      // 🔥 STOCK VALIDATION
       if (item.quantity > item.product.stock) {
         return res.status(400).json({
-          message: `Insufficient stock for ${item.product.name}`,
+          message: `Only ${item.product.stock} items available for "${item.product.name}".`
         });
       }
 
@@ -29,20 +32,24 @@ exports.createOrder = async (req, res) => {
         product: item.product._id,
         quantity: item.quantity,
         price: item.product.price,
+        seller: item.product.seller, // important for seller orders
       });
-
-      // Reduce stock
-      item.product.stock -= item.quantity;
-      await item.product.save();
     }
 
+    // 🔥 CREATE ORDER
     const order = await Order.create({
       user: req.user._id,
       orderItems,
       totalAmount,
     });
 
-    // Clear cart
+    // 🔥 REDUCE STOCK AFTER ORDER SUCCESS
+    for (let item of cart.items) {
+      item.product.stock -= item.quantity;
+      await item.product.save();
+    }
+
+    // 🔥 CLEAR CART
     cart.items = [];
     await cart.save();
 
@@ -53,7 +60,6 @@ exports.createOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // @desc Get My Orders
 // @route GET /api/orders/my
@@ -124,5 +130,89 @@ exports.getSellerOrders = async (req, res) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+// @desc    Cancel Order
+// @route   PUT /api/orders/:id/cancel
+// @access  Private (Buyer)
+exports.cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("orderItems.product");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Only owner can cancel
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Cannot cancel delivered orders
+    if (order.status === "Delivered") {
+      return res.status(400).json({
+        message: "Delivered orders cannot be cancelled"
+      });
+    }
+
+    // Restore stock
+    for (let item of order.orderItems) {
+      const product = await Product.findById(item.product._id);
+      product.stock += item.quantity;
+      await product.save();
+    }
+
+    order.status = "Cancelled";
+    await order.save();
+
+    res.status(200).json({ message: "Order cancelled successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// CANCEL ORDER
+exports.cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Ownership check
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    // Cannot cancel delivered order
+    if (order.status === "Delivered") {
+      return res.status(400).json({
+        message: "Delivered order cannot be cancelled",
+      });
+    }
+
+    // Already cancelled
+    if (order.status === "Cancelled") {
+      return res.status(400).json({
+        message: "Order already cancelled",
+      });
+    }
+
+    order.status = "Cancelled";
+    await order.save();
+
+    res.json({
+      message: "Order cancelled successfully",
+      order,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

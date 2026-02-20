@@ -18,8 +18,8 @@ function Checkout() {
       await API.post("/orders");
       navigate("/success");
     } catch (error) {
-      alert("Error placing order");
-    }
+      alert(error.response?.data?.message||"Order Failed");
+  }
   };
 
   if (!cart || !cart.items || cart.items.length === 0) {
