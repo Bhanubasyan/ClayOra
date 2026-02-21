@@ -137,46 +137,10 @@ exports.getSellerOrders = async (req, res) => {
 // @desc    Cancel Order
 // @route   PUT /api/orders/:id/cancel
 // @access  Private (Buyer)
-exports.cancelOrder = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id)
-      .populate("orderItems.product");
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    // Only owner can cancel
-    if (order.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    // Cannot cancel delivered orders
-    if (order.status === "Delivered") {
-      return res.status(400).json({
-        message: "Delivered orders cannot be cancelled"
-      });
-    }
-
-    // Restore stock
-    for (let item of order.orderItems) {
-      const product = await Product.findById(item.product._id);
-      product.stock += item.quantity;
-      await product.save();
-    }
-
-    order.status = "Cancelled";
-    await order.save();
-
-    res.status(200).json({ message: "Order cancelled successfully" });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-// CANCEL ORDER
+// @desc    Cancel Order
+// @route   PUT /api/orders/cancel/:id
+// @access  Private (Buyer)
 exports.cancelOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -187,7 +151,7 @@ exports.cancelOrder = async (req, res) => {
 
     // Ownership check
     if (order.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: "Not authorized" });
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     // Cannot cancel delivered order
@@ -207,12 +171,13 @@ exports.cancelOrder = async (req, res) => {
     order.status = "Cancelled";
     await order.save();
 
-    res.json({
+    res.status(200).json({
       message: "Order cancelled successfully",
       order,
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
