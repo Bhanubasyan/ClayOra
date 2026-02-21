@@ -14,6 +14,8 @@ import SellerProducts from "./pages/seller/SellerProducts";
 import AddProduct from "./pages/seller/AddProduct";
 import SellerOrders from "./pages/seller/SellerOrders";
 import EditProduct from "./pages/seller/EditProduct";
+import AdminRoute from "./components/AdminRoute";
+import SellerRoute from "./components/SellerRoute";
 function App() {
   return (
     <Router>
@@ -23,14 +25,28 @@ function App() {
   
   <Route path="/" element={<Home />} />
  <Route path="/auth" element={<Auth />} />
-<Route path="/admin" element={<AdminDashboard />} />
+<Route
+  path="/admin"
+  element={
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  }
+/>
 
   <Route path="/cart" element={<Cart />} />
   <Route path="/product/:id" element={<ProductDetails />} />
   <Route path="/checkout" element={<Checkout />} />
 <Route path="/success" element={<OrderSuccess />} />
 <Route path="/profile" element={<Profile />} />
-<Route path="/seller" element={<SellerDashboard />}>
+<Route
+  path="/seller"
+  element={
+    <SellerRoute>
+      <SellerDashboard />
+    </SellerRoute>
+  }
+>
   <Route path="products" element={<SellerProducts />} />
   <Route path="add-product" element={<AddProduct />} />
   <Route path="orders" element={<SellerOrders />} />

@@ -21,7 +21,13 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data));
 
       alert("Login Successful!");
-      navigate("/");
+      if (data.role === "admin") {
+  navigate("/admin/dashboard");
+} else if (data.role === "seller") {
+  navigate("/seller/dashboard");
+} else {
+  navigate("/");
+}
     } catch (error) {
       alert(error.response?.data?.message || "Login Failed");
       console.log(error.response?.data);

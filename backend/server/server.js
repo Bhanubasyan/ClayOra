@@ -10,6 +10,8 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const adminRoutes = require("./routes/AdminRoute");
+const sellerRoutes = require("./routes/SellerRoute");
 dotenv.config();
 connectDB();
 
@@ -39,7 +41,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/orders", orderRoutes);
-
+app.use("/api/admin", adminRoutes);
+app.use("/api/seller", sellerRoutes);
 // Rate Limiter (Global)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
