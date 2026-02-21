@@ -30,9 +30,9 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://full-stack-ecommerce-marketplace-4k46kq0fi.vercel.app",
+      "https://full-stack-ecommerce-marketplace.vercel.app/",
     ],
-    
+     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
