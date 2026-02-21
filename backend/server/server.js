@@ -24,10 +24,11 @@ const app = express();
 app.use(helmet()); // Secure HTTP headers
 app.use(express.json()); // Parse JSON body
 app.use(cookieParser()); // Parse cookies
-app.options("*", cors());
+
 
 //  VERY IMPORTANT FOR IMAGE LOADING
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join
+  (__dirname, "uploads")));
 
 // CORS configuration
 app.use(
