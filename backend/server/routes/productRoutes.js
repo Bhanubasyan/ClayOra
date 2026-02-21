@@ -3,7 +3,6 @@ const router = express.Router();
 const upload = require("../middleware/upload");
 const { protect, admin, seller } = require("../middleware/authMiddleware");
 
-const sellerOnly  = require("../middleware/authMiddleware");
 const {
   createProduct,
   getProducts,
@@ -37,8 +36,7 @@ router.put("/:id/approve", protect, admin, approveProduct);
 router.post(
   "/",
   protect,
-  sellerOnly,
-  upload.single("image"),   // 👈 important
+  upload.single("image"),   
   createProduct
 );
 
