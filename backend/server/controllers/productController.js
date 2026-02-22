@@ -5,25 +5,40 @@ const Product = require("../models/Product");
 // @access  Admin
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, stock, image } = req.body;
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
-   const product = await Product.create({
-  name,
-  description,
-  price,
-  category,
-  stock,
-  image: req.file.path, // 🔥 get image path from multer
-  seller: req.user._id,   
-});
+    if (!req.body) {
+      return res.status(400).json({ message: "No form data received" });
+    }
+
+    const name = req.body.name;
+    const description = req.body.description;
+    const price = req.body.price;
+    const category = req.body.category;
+    const stock = req.body.stock;
+
+    if (!name || !price) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const product = await Product.create({
+      name,
+      description,
+      price,
+      category,
+      stock,
+      image: req.file ? req.file.path : null, // Cloudinary URL
+      seller: req.user._id,
+    });
 
     res.status(201).json(product);
+
   } catch (error) {
-    console.error(error);
+    console.error("CREATE PRODUCT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
 // @desc    Get All Products
 // @route   GET /api/products
 // @access  Public
