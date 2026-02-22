@@ -20,30 +20,27 @@ function AddProduct() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("description", form.description);
-    formData.append("price", form.price);
-    formData.append("category", form.category);
-    formData.append("stock", form.stock);
-    formData.append("image", form.image);  // 👈 file send
+  const formData = new FormData();
+  formData.append("name", form.name);
+  formData.append("description", form.description);
+  formData.append("price", form.price);
+  formData.append("category", form.category);
+  formData.append("stock", form.stock);
 
-    try {
-      await API.post("/products", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+  if (form.image) {
+    formData.append("image", form.image);
+  }
 
-      alert("Product Added");
-    } catch (error) {
-      alert("Error adding product");
-      console.log(error);
-    }
-  };
-
+  try {
+    await API.post("/products", formData);   // ❌ NO HEADERS HERE
+    alert("Product Added");
+  } catch (error) {
+    console.log(error.response?.data);
+    alert("Error adding product");
+  }
+};
   return (
     <form onSubmit={handleSubmit}>
       <h2>Add Product</h2>

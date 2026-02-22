@@ -91,7 +91,7 @@ exports.seedProducts = async (req, res) => {
         price: Math.floor(Math.random() * 2000) + 200,
         category: i % 2 === 0 ? "Pottery" : "Wood",
         stock: Math.floor(Math.random() * 50) + 1,
-        image: "https://example.com/product.jpg",
+        image: "https://www.google.com/imgres?q=pottery%20image&imgurl=https%3A%2F%2Fimg.freepik.com%2Ffree-photo%2Fhands-working-pottery-wheel_181624-57055.jpg%3Fsemt%3Dais_user_personalization%26w%3D740%26q%3D80&imgrefurl=https%3A%2F%2Fwww.freepik.com%2Ffree-photos-vectors%2Fpottery&docid=o0qDqNTZNkXDfM&tbnid=UKhlYw7EqDOSPM&vet=12ahUKEwjmiIrvp-ySAxWnR2wGHVxlADQQnPAOegQIFhAB..i&w=740&h=493&hcb=2&ved=2ahUKEwjmiIrvp-ySAxWnR2wGHVxlADQQnPAOegQIFhAB",
         seller: req.user._id,   // 🔥 VERY IMPORTANT
       });
     }

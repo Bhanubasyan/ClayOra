@@ -1,77 +1,87 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const helmet = require("helmet");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
-const path = require("path"); 
+const path = require("path");
+
 const connectDB = require("./config/db");
-const authRoutes = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-const sellerRoutes = require("./routes/sellerRoutes");
+
 dotenv.config();
 connectDB();
 
 const app = express();
 
-// --------------------
-// Security Middlewares
-// --------------------
+/* ================================
+   CORS CONFIGURATION
+================================ */
 
-app.use(helmet()); // Secure HTTP headers
-app.use(express.json()); // Parse JSON body
-app.use(cookieParser()); // Parse cookies
+const allowedOrigins = [
+  "http://localhost:3000",   // Local frontend
+  // 🔥 Add your Render frontend URL here after deploy
+  // "https://your-frontend-name.onrender.com"
+];
 
-
-//  VERY IMPORTANT FOR IMAGE LOADING
-app.use("/uploads", express.static(path.join
-  (__dirname, "uploads")));
-
-// CORS configuration
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://full-stack-ecommerce-marketplace.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow postman
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
+/* ================================
+   MIDDLEWARE
+================================ */
 
-app.use("/api/cart", cartRoutes);
+app.use(express.json());
+app.use(cookieParser());
 
-app.use("/api/products", productRoutes);
+// Serve uploaded images
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
-app.use("/api/orders", orderRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/seller", sellerRoutes);
-// Rate Limiter (Global)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per window
-});
-app.use(limiter);
+/* ================================
+   ROUTES
+================================ */
 
-// --------------------
-// Routes
-// --------------------
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/cart", require("./routes/cartRoutes"));
+app.use("/api/orders", require("./routes/orderRoutes"));
 
-app.use("/api/auth", authRoutes);
+/* ================================
+   HEALTH CHECK
+================================ */
 
 app.get("/", (req, res) => {
-  res.send("API Running Securely...");
+  res.send("🚀 API is running...");
 });
 
-// --------------------
-// Server Start
-// --------------------
+/* ================================
+   ERROR HANDLER
+================================ */
+
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  res.status(500).json({
+    message: err.message || "Internal Server Error",
+  });
+});
+
+/* ================================
+   SERVER START
+================================ */
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🔥 Server running on port ${PORT}`);
 });
