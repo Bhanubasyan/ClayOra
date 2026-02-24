@@ -1,7 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 /* Full height system */
 html, body, #root {
   height: 100%;
   margin: 0;
+   overflow-x: hidden;
 }
 
 /* Main layout wrapper */
@@ -16,116 +22,6 @@ html, body, #root {
   flex: 1;
 }
 
-/* NAVBAR */
-.navbar {
-height: 10vh;
-  position: relative;
-  top: 0;
-  z-index: 1000;
-  background: #fcf7f3;
-  padding: 18px 8%;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-}
-.logo-section {
-  display: flex;
-  align-items: center;
-}
-
-.logo-img {
-  height: 150px;   /* adjust kar sakta hai */
-  width: auto;
-  object-fit: contain;
-  border-radius: 50%;
-}
-/* Footer constant height */
-.footer {
-  height: 60px;
-  background: #f5eee8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-
-.nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo a {
-  text-decoration: none;
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
-  color: #C65D3B;
-}
-
-.nav-links a {
-  margin-left: 28px;
-  text-decoration: none;
-  color: #2E2A27;
-  font-weight: 500;
-  transition: 0.3s ease;
-  position: relative;
-}
-
-.nav-links a:hover {
-  color: #C65D3B;
-}
-
-.nav-links a.active {
-  color: #C65D3B;
-  font-weight: 600;
-}
-
-.logout-btn,
-.login-btn {
-  margin-left: 28px;
-  padding: 8px 18px;
-  border-radius: 25px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  background: #C65D3B;
-  color: white;
-  transition: 0.3s ease;
-}
-
-.logout-btn:hover,
-.login-btn:hover {
-  background: #a94a2f;
-}
-
-/* Tablet */
-@media (max-width: 1024px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .home-hero h1 {
-    font-size: 24px;
-  }
-
-  .navbar {
-    padding: 15px 5%;
-  }
-}
-
-@media (max-width: 768px) {
-  .nav-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-}
 
 
 /* FORCE BORDER ON HOME PRODUCT IMAGES */

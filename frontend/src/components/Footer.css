@@ -1,7 +1,11 @@
+/* Footer constant height */
 .footer {
-  background: #2E2A27;
-  color: #f5eee8;
-  padding: 25px 5px;
+  height: 60px;
+  background: #f5eee8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
 .footer-container {
