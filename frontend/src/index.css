@@ -18,8 +18,8 @@ html, body, #root {
 
 /* NAVBAR */
 .navbar {
-height: fit-content;
-  position: sticky;
+height: 10vh;
+  position: relative;
   top: 0;
   z-index: 1000;
   background: #fcf7f3;
