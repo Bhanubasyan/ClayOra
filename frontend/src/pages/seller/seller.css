@@ -135,3 +135,46 @@
 .primary-btn:hover {
   background: #a94a2f;
 }
+
+
+/* EDIT PRODUCT PAGE */
+.edit-product-container {
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.edit-product-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+}
+
+.edit-title {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 25px;
+  color: #2E2A27;
+  text-align: center;
+}
+
+.edit-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.edit-product-form input,
+.edit-product-form textarea {
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.edit-product-form input:focus,
+.edit-product-form textarea:focus {
+  border-color: #C65D3B;
+}
