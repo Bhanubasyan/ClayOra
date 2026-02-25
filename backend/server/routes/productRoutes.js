@@ -26,11 +26,11 @@ router.post("/seed", protect, admin, seedProducts);
 // Approve product (Admin only)
 router.put("/:id/approve", protect, admin, approveProduct);
 
-// Update product (Admin only)
-router.put("/:id", protect, admin, updateProduct);
+// Update product 
+router.put("/:id", protect, updateProduct);
 
 // Delete product (Admin only)
-router.delete("/:id", protect, admin, deleteProduct);
+router.delete("/:id", protect, deleteProduct);
 
 
 // =========================

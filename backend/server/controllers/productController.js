@@ -147,26 +147,30 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const { name, description, price, category, stock, image } = req.body;
+    // 🔥 Ownership + Admin Check
+    if (
+      product.seller.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.category = category || product.category;
-    product.stock = stock || product.stock;
-    product.image = image || product.image;
+    // 🔥 Update Fields
+    product.name = req.body.name || product.name;
+    product.description = req.body.description || product.description;
+    product.price = req.body.price || product.price;
+    product.category = req.body.category || product.category;
+    product.stock = req.body.stock || product.stock;
+    product.image = req.body.image || product.image;
 
     const updatedProduct = await product.save();
 
-    res.status(200).json(updatedProduct);
+    res.json(updatedProduct);
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
-
 // @desc    Delete Product
 // @route   DELETE /api/products/:id
 // @access  Admin
