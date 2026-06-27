@@ -130,6 +130,59 @@
 .product-link:hover {
   color: #371509 !important;
 }
+
+/* cateorgy section */
+.category-section{
+    background:white;
+    padding:20px 0;
+    margin-top:20px;
+}
+
+.category-list{
+    display:flex;
+    gap:40px;
+    overflow-x:auto;
+    padding:0 30px;
+    scrollbar-width:none;
+}
+
+.category-list::-webkit-scrollbar{
+    display:none;
+}
+
+.category-item{
+    min-width:90px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    cursor:pointer;
+}
+
+.category-icon{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#f7f3ee;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:34px;
+    color:#8B5E3C;
+    transition:.3s;
+}
+
+.category-item:hover .category-icon{
+    background:#8B5E3C;
+    color:white;
+}
+
+.category-item span{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:600;
+    text-align:center;
+}
+
 /* PRICE */
 .price {
   margin: 8px 0 15px;

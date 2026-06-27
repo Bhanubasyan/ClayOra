@@ -12,6 +12,25 @@ import image7 from "../assets/hero/image7.jpg";
 import image8 from "../assets/hero/image8.jpg";
 import image9 from "../assets/hero/image10.jpg";
 
+import {
+  FaHome,
+  FaGift,
+  FaLightbulb,
+  FaCouch,
+  FaPaintBrush,
+} from "react-icons/fa";
+
+import {
+  GiFlowerPot,
+  GiWoodPile,
+  GiCandleHolder,
+  GiAmphora,
+} from "react-icons/gi";
+
+import { MdKitchen } from "react-icons/md";
+import { PiWallBold } from "react-icons/pi";
+import { TbJewishStar } from "react-icons/tb";
+
 function Home() {
   const heroImages = [
     image2,
@@ -64,6 +83,25 @@ const productsSectionRef = useRef(null);
     }
   };
 
+const categories = [
+  { name: "Home Decor", icon: <FaHome /> },
+  { name: "Wall Decor", icon: <PiWallBold /> },
+  { name: "Pottery", icon: "🏺" },
+  { name: "Wooden Crafts", icon: <GiWoodPile /> },
+  { name: "Kitchen", icon: <MdKitchen /> },
+  { name: "Planters", icon: <GiFlowerPot /> },
+  { name: "Vases", icon: <GiAmphora /> },
+  { name: "Candles", icon: <GiCandleHolder /> },
+  { name: "Jewelry", icon: "💍" },
+  { name: "Furniture", icon: <FaCouch /> },
+  { name: "Artwork", icon: <FaPaintBrush /> },
+  { name: "Textile", icon: "🧶" },
+  { name: "Gifts", icon: <FaGift /> },
+  { name: "Festival", icon: "🎉" },
+  { name: "Spiritual", icon: "🪔" },
+  { name: "Lighting", icon: <FaLightbulb /> },
+];
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -115,6 +153,7 @@ const productsSectionRef = useRef(null);
     }
   };
 
+
   return (
     <>
       {/* ================= HERO SECTION ================= */}
@@ -143,6 +182,25 @@ const productsSectionRef = useRef(null);
           </button>
         </div>
       </section>
+
+
+{/* ================= Cateogory section ================= */}
+<div className="category-section">
+  <div className="category-list">
+
+    {categories.map((item) => (
+      <div className="category-item" key={item.name}>
+        <div className="category-icon">
+          {item.icon}
+        </div>
+
+        <span>{item.name}</span>
+      </div>
+    ))}
+
+  </div>
+</div>
+
 
       {/* ================= MAIN CONTENT ================= */}
      <div className="home-container" ref={productsSectionRef}>
