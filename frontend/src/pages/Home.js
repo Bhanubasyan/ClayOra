@@ -3,14 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import API from "../services/api";
 import "./Home.css";
 
-import image2 from "../assets/hero/image2.png";
-import image3 from "../assets/hero/image3.png";
-import image4 from "../assets/hero/image4.png";
-import image5 from "../assets/hero/image5.png";
-import image6 from "../assets/hero/image6.png";
-import image7 from "../assets/hero/image7.png";
-import image8 from "../assets/hero/image8.png";
-import image9 from "../assets/hero/image9.png";
+import image2 from "../assets/hero/image2.jpg";
+import image3 from "../assets/hero/image3.jpg";
+import image4 from "../assets/hero/image4.jpg";
+import image5 from "../assets/hero/image5.jpg";
+
+import image7 from "../assets/hero/image7.jpg";
+import image8 from "../assets/hero/image8.jpg";
+import image9 from "../assets/hero/image10.jpg";
 
 function Home() {
   const heroImages = [
