@@ -1,25 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Landing from "./pages/Landing";
-import Home from "./pages/Home";
-import Cart from "./pages/Cart";
-import ProductDetails from "./pages/ProductDetails";
-import Auth from "./pages/Auth";
-import AdminDashboard from "./pages/AdminDashboard";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import Profile from "./pages/Profile";
+// Pages
+import Landing from "./pages/Landing/Landing";
+import Home from "./pages/Home/Home";
+import Auth from "./pages/Auth/Auth";
+import Cart from "./pages/Cart/Cart";
+import Checkout from "./pages/Checkout/Checkout";
+import ProductDetails from "./pages/Product/ProductDetails";
+import OrderSuccess from "./pages/Success/OrderSuccess";
+import Profile from "./pages/Profile/Profile";
 
-import SellerDashboard from "./pages/seller/SellerDashboard";
-import SellerProducts from "./pages/seller/SellerProducts";
-import AddProduct from "./pages/seller/AddProduct";
-import SellerOrders from "./pages/seller/SellerOrders";
-import EditProduct from "./pages/seller/EditProduct";
+// Admin
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
-import AdminRoute from "./components/AdminRoute";
-import SellerRoute from "./components/SellerRoute";
-import MainLayout from "./components/MainLayout";
+// Seller
+import SellerDashboard from "./pages/Seller/SellerDashboard";
+import SellerProducts from "./pages/Seller/SellerProducts";
+import AddProduct from "./pages/Seller/AddProduct";
+import SellerOrders from "./pages/Seller/SellerOrders";
+import EditProduct from "./pages/Seller/EditProduct";
 
+// Components
+import AdminRoute from "./components/admin/AdminRoute";
+import SellerRoute from "./components/seller/SellerRoute";
+import MainLayout from "./components/layout/MainLayout";
 
 function App() {
   return (

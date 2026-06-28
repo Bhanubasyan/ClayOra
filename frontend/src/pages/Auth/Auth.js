@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api";
-import "./auth.css";
+import API from "../../services/api";
+import "./Auth.css";
 
 function Auth() {
   const [isFlipped, setIsFlipped] = useState(false);

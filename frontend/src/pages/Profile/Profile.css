@@ -20,7 +20,7 @@
   padding: 54px 8% 42px;
   background:
     linear-gradient(120deg, rgba(46, 42, 39, 0.88), rgba(198, 93, 59, 0.78)),
-    url("../assets/pottery1.jpg") center/cover;
+    url("../../assets/images/pottery1.jpg") center/cover;
   color: white;
 }
 

@@ -1,16 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../services/api";
+import API from "../../services/api";
 import "./Home.css";
 
-import image2 from "../assets/hero/image2.jpg";
-import image3 from "../assets/hero/image3.jpg";
-import image4 from "../assets/hero/image4.jpg";
-import image5 from "../assets/hero/image5.jpg";
-
-import image7 from "../assets/hero/image7.jpg";
-import image8 from "../assets/hero/image8.jpg";
-import image9 from "../assets/hero/image10.jpg";
+import image2 from "../../assets/hero/image2.jpg";
+import image3 from "../../assets/hero/image3.jpg";
+import image4 from "../../assets/hero/image4.jpg";
+import image5 from "../../assets/hero/image5.jpg";
+import image7 from "../../assets/hero/image7.jpg";
+import image8 from "../../assets/hero/image8.jpg";
+import image10 from "../../assets/hero/image10.jpg";
 
 import {
   FaHome,
@@ -39,7 +38,7 @@ function Home() {
     image5,
     image7,
     image8,
-    image9,
+    image10,
   ];
 const productsSectionRef = useRef(null);
   const [products, setProducts] = useState([]);

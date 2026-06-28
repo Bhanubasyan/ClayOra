@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api";
-import "./profile.css";
+import API from "../../services/api";
+import "./Profile.css";
 {/*Bhanu */}
 const defaultProfile = {
   phone: "",

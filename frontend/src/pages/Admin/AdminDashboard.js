@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import API from "../services/api";
-import "./admin.css";
+import API from "../../services/api";
+import "./Admin.css";
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
