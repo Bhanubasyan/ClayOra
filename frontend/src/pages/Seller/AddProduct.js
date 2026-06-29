@@ -129,7 +129,10 @@ const tags = [
 
   <div className="tags-grid">
     {tags.map((tag) => (
-      <label key={tag} className="tag-item">
+      <label
+  key={tag}
+  className={`tag-item ${form.tags.includes(tag) ? "active-tag" : ""}`}
+>
         <input
           type="checkbox"
           checked={form.tags.includes(tag)}
