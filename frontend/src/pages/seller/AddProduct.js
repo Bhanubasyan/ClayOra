@@ -8,9 +8,38 @@ function AddProduct() {
     description: "",
     price: "",
     category: "",
+    tags: [],
     stock: "",
     image: null,
   });
+
+const tags = [
+  "Home Decor",
+  "Wall Decor",
+  "Wooden Crafts",
+  "Kitchen",
+  "Planters",
+  "Vases",
+  "Candles",
+  "Jewelry",
+  "Furniture",
+  "Artwork",
+  "Textile",
+  "Gifts",
+  "Festival",
+  "Spiritual",
+  "Lighting",
+];
+
+  const handleTagChange = (tag) => {
+  setForm((prev) => ({
+    ...prev,
+    tags: prev.tags.includes(tag)
+      ? prev.tags.filter((t) => t !== tag)
+      : [...prev.tags, tag],
+  }));
+};
+
 
   const handleChange = (e) => {
     if (e.target.name === "image") {
@@ -28,11 +57,14 @@ function AddProduct() {
       return;
     }
 
+
+
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("description", form.description);
     formData.append("price", form.price);
     formData.append("category", form.category);
+    formData.append("tags", JSON.stringify(form.tags));
     formData.append("stock", form.stock);
     formData.append("image", form.image);
 
@@ -56,6 +88,8 @@ function AddProduct() {
     }
   };
 
+
+  
   return (
     <div className="add-product-container">
       <div className="add-product-card">
@@ -88,6 +122,24 @@ function AddProduct() {
             onChange={handleChange}
             required
           />
+
+ {/*Tags dropdown*/}
+          <div className="tags-container">
+  <label>Select Tags</label>
+
+  <div className="tags-grid">
+    {tags.map((tag) => (
+      <label key={tag} className="tag-item">
+        <input
+          type="checkbox"
+          checked={form.tags.includes(tag)}
+          onChange={() => handleTagChange(tag)}
+        />
+        {tag}
+      </label>
+    ))}
+  </div>
+</div>
 
           {/* CATEGORY DROPDOWN (Matches Backend Enum) */}
           <select

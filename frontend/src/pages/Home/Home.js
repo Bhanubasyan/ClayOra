@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import API from "../../services/api";
 import "./Home.css";
 
@@ -41,6 +42,8 @@ function Home() {
     image10,
   ];
 const productsSectionRef = useRef(null);
+const location = useLocation();
+const tag = new URLSearchParams(location.search).get("tag");
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -67,12 +70,22 @@ const productsSectionRef = useRef(null);
       setError("");
 
       let url = `/products?keyword=${keyword}`;
-      if (selectedCategory) {
-        url += `&category=${selectedCategory}`;
-      }
 
-      const res = await API.get(url);
-      setProducts(res.data.products);
+if (selectedCategory) {
+  url += `&category=${selectedCategory}`;
+}
+
+if (tag) {
+  url += `&tag=${encodeURIComponent(tag)}`;
+}
+
+console.log("TAG =", tag);
+console.log("URL =", url);
+
+const res = await API.get(url);
+
+console.log("Returned:", res.data.products.length);
+setProducts(res.data.products);
 
     } catch (err) {
       console.log(err);
@@ -103,7 +116,7 @@ const categories = [
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+}, [tag]);
 
   /* ================= SCROLL ANIMATION ================= */
   useEffect(() => {
@@ -188,13 +201,17 @@ const categories = [
   <div className="category-list">
 
     {categories.map((item) => (
-      <div className="category-item" key={item.name}>
+<Link
+  to={`/home?tag=${encodeURIComponent(item.name)}`}
+  className="category-item"
+  key={item.name}
+>
         <div className="category-icon">
           {item.icon}
         </div>
 
         <span>{item.name}</span>
-      </div>
+      </Link>
     ))}
 
   </div>
@@ -221,12 +238,14 @@ const categories = [
             onChange={handleCategoryChange}
             className="category-dropdown"
           >
-            <option value="">All Categories</option>
+            <option value="">Categories</option>
             <option value="Pottery">Pottery</option>
             <option value="Wood">Wood</option>
           </select>
         </div>
+  
 
+  
         {/* PRODUCTS GRID */}
         <div className="products-grid">
 
