@@ -20,6 +20,13 @@ const productSchema = new mongoose.Schema(
       enum: ["Pottery", "Wood"],
       required: true,
     },
+    tags: [
+  {
+    type: String,
+    trim: true,
+  },
+],
+
     stock: {
       type: Number,
       required: true,

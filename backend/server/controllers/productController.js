@@ -9,7 +9,16 @@ exports.createProduct = async (req, res) => {
       return res.status(403).json({ message: "Admin or seller access only" });
     }
 
-    const { name, description, price, category, stock, image } = req.body;
+  const {
+  name,
+  description,
+  price,
+  category,
+  stock,
+  image,
+  tags,
+} = req.body;
+
     const productImage = req.file?.path || image;
 
     if (!name || !description || !price || !category || !stock || !productImage) {
@@ -21,6 +30,7 @@ exports.createProduct = async (req, res) => {
       description,
       price: Number(price),
       category,
+      tags: tags ? JSON.parse(tags) : [],
       stock: Number(stock),
       image: productImage,
       seller: req.user._id,
@@ -42,6 +52,7 @@ exports.getProducts = async (req, res) => {
     const {
       keyword,
       category,
+      tag,
       minPrice,
       maxPrice,
       page = 1,
@@ -62,6 +73,11 @@ exports.getProducts = async (req, res) => {
     if (category) {
       query.category = category;
     }
+    
+ // Filter by tag
+if (tag) {
+  query.tags = tag;
+}
 
     // 💰 Price filter
     if (minPrice || maxPrice) {
@@ -69,6 +85,10 @@ exports.getProducts = async (req, res) => {
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
+
+    
+ console.log(query);
+
 
  const products = await Product.find(query)
    .limit(Number(limit))
