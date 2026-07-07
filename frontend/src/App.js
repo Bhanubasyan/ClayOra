@@ -9,6 +9,8 @@ import Checkout from "./pages/Checkout/Checkout";
 import ProductDetails from "./pages/Product/ProductDetails";
 import OrderSuccess from "./pages/Success/OrderSuccess";
 import Profile from "./pages/Profile/Profile";
+import Wishlist from "./pages/Wishlist/Wishlist";
+import TrackOrder from "./pages/TrackOrder/TrackOrder";
 
 // Admin
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -45,6 +47,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/success" element={<OrderSuccess />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/track-order" element={<TrackOrder />} />
 
           {/* ================= ADMIN ================= */}
           <Route

@@ -73,6 +73,26 @@ function Navbar() {
             Cart
           </Link>
 
+          {user && (
+            <Link
+              onClick={() => setMenuOpen(false)}
+              className={location.pathname === "/wishlist" ? "active" : ""}
+              to="/wishlist"
+            >
+              Wishlist
+            </Link>
+          )}
+
+          {user && (
+            <Link
+              onClick={() => setMenuOpen(false)}
+              className={location.pathname === "/track-order" ? "active" : ""}
+              to="/track-order"
+            >
+              Track Order
+            </Link>
+          )}
+
           {user?.role === "admin" && (
             <Link onClick={() => setMenuOpen(false)} to="/admin">
               Admin

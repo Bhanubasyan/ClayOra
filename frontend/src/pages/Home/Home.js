@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import API from "../../services/api";
@@ -29,7 +29,6 @@ import {
 
 import { MdKitchen } from "react-icons/md";
 import { PiWallBold } from "react-icons/pi";
-import { TbJewishStar } from "react-icons/tb";
 
 function Home() {
   const heroImages = [
@@ -50,6 +49,7 @@ const tag = new URLSearchParams(location.search).get("tag");
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [wishlistIds, setWishlistIds] = useState([]);
 
   const navigate = useNavigate();
   const productRef = useRef([]);
@@ -64,7 +64,7 @@ const tag = new URLSearchParams(location.search).get("tag");
   }, [heroImages.length]);
 
   /* ================= FETCH PRODUCTS ================= */
-  const fetchProducts = async (keyword = "", selectedCategory = "") => {
+  const fetchProducts = useCallback(async (keyword = "", selectedCategory = "") => {
     try {
       setLoading(true);
       setError("");
@@ -93,7 +93,7 @@ setProducts(res.data.products);
     } finally {
       setLoading(false);
     }
-  };
+  }, [tag]);
 
 const categories = [
   { name: "Home Decor", icon: <FaHome /> },
@@ -116,7 +116,13 @@ const categories = [
 
   useEffect(() => {
     fetchProducts();
-}, [tag]);
+}, [fetchProducts]);
+
+  useEffect(() => {
+    API.get("/wishlist")
+      .then((res) => setWishlistIds(res.data.map((product) => product._id)))
+      .catch(() => setWishlistIds([]));
+  }, []);
 
   /* ================= SCROLL ANIMATION ================= */
   useEffect(() => {
@@ -159,6 +165,21 @@ const categories = [
         quantity: 1,
       });
       alert("Added to Cart!");
+    } catch (error) {
+      alert("Please login first");
+      navigate("/login");
+    }
+  };
+
+  const toggleWishlist = async (productId) => {
+    try {
+      if (wishlistIds.includes(productId)) {
+        const res = await API.delete(`/wishlist/${productId}`);
+        setWishlistIds(res.data.map((product) => product._id));
+      } else {
+        const res = await API.post("/wishlist", { productId });
+        setWishlistIds(res.data.map((product) => product._id));
+      }
     } catch (error) {
       alert("Please login first");
       navigate("/login");
@@ -268,6 +289,15 @@ const categories = [
                   key={product._id}
                   ref={(el) => (productRef.current[index] = el)}
                 >
+                  <button
+                    className={`wishlist-toggle ${
+                      wishlistIds.includes(product._id) ? "saved" : ""
+                    }`}
+                    onClick={() => toggleWishlist(product._id)}
+                    aria-label="Toggle wishlist"
+                  >
+                    ♥
+                  </button>
                   <Link
                     to={`/product/${product._id}`}
                     className="product-link"
@@ -280,6 +310,9 @@ const categories = [
                   </Link>
 
                   <p className="price">Rs. {product.price}</p>
+                  <p className="rating-line">
+                    ★ {Number(product.rating || 0).toFixed(1)} ({product.numReviews || 0})
+                  </p>
 
                   <button onClick={() => addToCart(product._id)}>
                     Add to Cart

@@ -1,0 +1,157 @@
+.track-page {
+  min-height: 100vh;
+  padding: 96px 7% 60px;
+  background: #f8f4ef;
+  color: #2e2a27;
+}
+
+.track-hero p {
+  color: #c65d3b;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.track-hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  margin: 8px 0 24px;
+}
+
+.track-search {
+  display: flex;
+  gap: 12px;
+  max-width: 760px;
+  margin-bottom: 18px;
+}
+
+.track-search input {
+  flex: 1;
+  border: 1px solid #ded2cb;
+  border-radius: 26px;
+  padding: 13px 18px;
+  outline: none;
+}
+
+.track-search button {
+  border: 0;
+  border-radius: 26px;
+  background: #c65d3b;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 13px 26px;
+}
+
+.track-card {
+  background: #fff;
+  border: 1px solid #eadfd8;
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(46, 42, 39, 0.08);
+  padding: 28px;
+  margin-top: 24px;
+}
+
+.track-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.track-summary div {
+  background: #fffaf7;
+  border: 1px solid #eadfd8;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.track-summary span,
+.track-history span {
+  display: block;
+  color: #8a7c74;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.track-summary strong {
+  overflow-wrap: anywhere;
+}
+
+.track-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
+  gap: 14px;
+  margin: 30px 0;
+}
+
+.track-step {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  color: #95877f;
+  font-weight: 800;
+  text-align: center;
+}
+
+.track-step span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ded2cb;
+  color: #fff;
+}
+
+.track-step.active {
+  color: #2e2a27;
+}
+
+.track-step.active span {
+  background: #c65d3b;
+}
+
+.track-history,
+.track-items {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.track-history div,
+.track-item {
+  border-top: 1px solid #eee4de;
+  padding-top: 12px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.track-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.track-error,
+.track-cancelled {
+  color: #a94a2f;
+  font-weight: 800;
+}
+
+@media (max-width: 800px) {
+  .track-search,
+  .track-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .track-summary,
+  .track-timeline {
+    grid-template-columns: 1fr;
+  }
+}

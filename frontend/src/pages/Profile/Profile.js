@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import "./Profile.css";
-{/*Bhanu */}
+
 const defaultProfile = {
   phone: "",
   alternatePhone: "",
@@ -24,6 +24,8 @@ const requiredFields = [
   "postalCode",
   "country",
 ];
+
+const trackingSteps = ["Pending", "Processing", "Shipped", "Delivered"];
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -360,10 +362,43 @@ function Profile() {
                       <span>Order ID</span>
                       <strong>{order._id}</strong>
                       <p>Total: Rs. {order.totalAmount}</p>
+                      <p>
+                        Payment: {order.paymentMethod || "COD"} -{" "}
+                        {order.paymentStatus || "Pending"}
+                      </p>
+                      <div className="tracking-line">
+                        {trackingSteps.map((step) => {
+                          const active =
+                            order.status === "Cancelled"
+                              ? step === "Pending"
+                              : trackingSteps.indexOf(step) <=
+                                trackingSteps.indexOf(order.status);
+
+                          return (
+                            <div
+                              className={`tracking-step ${active ? "active" : ""}`}
+                              key={step}
+                            >
+                              <span></span>
+                              <small>{step}</small>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {order.status === "Cancelled" && (
+                        <p className="cancelled-note">Order cancelled</p>
+                      )}
                     </div>
 
                     <div className="order-actions">
                       <div className="order-status">{order.status}</div>
+
+                      <button
+                        className="track-btn"
+                        onClick={() => navigate(`/track-order?orderId=${order._id}`)}
+                      >
+                        Track Order
+                      </button>
 
                       {order.status !== "Delivered" &&
                         order.status !== "Cancelled" && (

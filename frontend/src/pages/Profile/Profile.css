@@ -229,7 +229,8 @@
 .primary-btn,
 .secondary-btn,
 .text-btn,
-.cancel-btn {
+.cancel-btn,
+.track-btn {
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -316,6 +317,40 @@
   font-weight: 700;
 }
 
+.tracking-line {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(58px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tracking-step {
+  color: #9a8c84;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.tracking-step span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ded2cb;
+  margin-bottom: 6px;
+}
+
+.tracking-step.active span {
+  background: #c65d3b;
+}
+
+.tracking-step.active {
+  color: #2e2a27;
+}
+
+.cancelled-note {
+  color: #a94a2f;
+}
+
 .order-actions {
   display: flex;
   flex-direction: column;
@@ -336,6 +371,16 @@
 
 .cancel-btn:hover {
   background: #a94a2f;
+}
+
+.track-btn {
+  padding: 9px 14px;
+  background: #f0e7e1;
+  color: #2e2a27;
+}
+
+.track-btn:hover {
+  background: #e3d5cc;
 }
 
 .no-orders {
