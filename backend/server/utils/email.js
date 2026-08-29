@@ -1,25 +1,39 @@
-const nodemailer = require("nodemailer");
-
-const getTransporter = () => {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    throw new Error("Email is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS.");
+const parseSender = () => {
+  const configuredSender = process.env.EMAIL_FROM || process.env.BREVO_SENDER_EMAIL;
+  if (!configuredSender) {
+    throw new Error("Email is not configured. Set BREVO_API_KEY and EMAIL_FROM.");
   }
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    // Set SMTP_TLS_REJECT_UNAUTHORIZED=false only for a trusted local/dev network
-    // that injects a self-signed TLS certificate. Keep the production default secure.
-    tls: {
-      rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
-    },
-  });
+
+  const senderMatch = configuredSender.match(/^(.*?)\s*<([^>]+)>$/);
+  return senderMatch
+    ? { name: senderMatch[1].trim() || "ClayOra", email: senderMatch[2].trim() }
+    : { name: process.env.BREVO_SENDER_NAME || "ClayOra", email: configuredSender.trim() };
 };
 
-exports.sendEmail = ({ to, subject, html }) => getTransporter().sendMail({
-  from: process.env.EMAIL_FROM || process.env.SMTP_USER,
-  to,
-  subject,
-  html,
-});
+exports.sendEmail = async ({ to, subject, html }) => {
+  if (!process.env.BREVO_API_KEY) {
+    throw new Error("Email is not configured. Set BREVO_API_KEY.");
+  }
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: parseSender(),
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Brevo email request failed (${response.status}): ${details}`);
+  }
+
+  return response.json();
+};
