@@ -1,6 +1,30 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const User = require("../models/User");
+const { sendEmail } = require("../utils/email");
+
+const notifySellersOfOrder = async (order, buyer) => {
+  const itemsBySeller = new Map();
+  order.orderItems.forEach((item) => {
+    const sellerId = item.seller?.toString();
+    if (!sellerId) return;
+    const sellerItems = itemsBySeller.get(sellerId) || [];
+    sellerItems.push(item);
+    itemsBySeller.set(sellerId, sellerItems);
+  });
+
+  const sellers = await User.find({ _id: { $in: [...itemsBySeller.keys()] } }).select("name email");
+  await Promise.allSettled(sellers.map((seller) => {
+    const items = itemsBySeller.get(seller._id.toString());
+    const lines = items.map((item) => `<li>${item.product.name} — Qty: ${item.quantity}</li>`).join("");
+    return sendEmail({
+      to: seller.email,
+      subject: `New order ${order._id}: items to prepare`,
+      html: `<p>Hello ${seller.name},</p><p>${buyer.name} has placed an order containing these items from your store:</p><ul>${lines}</ul><p>Please prepare and pack them for shipment.</p><p>Order ID: ${order._id}</p>`,
+    });
+  }));
+};
 
 // @desc Create Order from Cart
 // @route POST /api/orders
@@ -56,6 +80,12 @@ for (let item of cart.items) {
     // Clear cart
     cart.items = [];
     await cart.save();
+
+    // A mail delivery problem should never undo a successfully placed order.
+    await order.populate("orderItems.product");
+    notifySellersOfOrder(order, req.user).catch((error) =>
+      console.error("Seller order notification failed:", error.message)
+    );
 
     res.status(201).json(order);
 

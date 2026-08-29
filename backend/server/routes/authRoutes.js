@@ -5,11 +5,15 @@ const {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  verifyEmail,
+  resendVerificationEmail,
 } = require("../controllers/authController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerificationEmail);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 router.get("/admin-test", protect, admin, (req, res) => {

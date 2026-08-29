@@ -237,6 +237,17 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 
 CLOUDINARY_API_SECRET=
+
+# Email (SMTP)
+CLIENT_URL=http://localhost:3000
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-username
+SMTP_PASS=your-smtp-password
+SMTP_SECURE=false
+EMAIL_FROM=ClayOra <no-reply@example.com>
+# Local development only, if your network causes "self-signed certificate" errors:
+# SMTP_TLS_REJECT_UNAUTHORIZED=false
 ```
 
 ---

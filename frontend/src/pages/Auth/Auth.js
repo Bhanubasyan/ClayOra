@@ -26,7 +26,17 @@ function Auth() {
       else navigate("/home");
 
     } catch (error) {
-      alert(error.response?.data?.message || "Login Failed");
+      const response = error.response?.data;
+      if (response?.needsEmailVerification && window.confirm("Your email is not verified. Send a new verification link?")) {
+        try {
+          const { data } = await API.post("/auth/resend-verification", { email });
+          alert(data.message);
+        } catch (resendError) {
+          alert(resendError.response?.data?.message || "Unable to resend verification email");
+        }
+        return;
+      }
+      alert(response?.message || "Login Failed");
     }
   };
 
@@ -44,11 +54,8 @@ function Auth() {
         role,
       });
 
-      localStorage.setItem("user", JSON.stringify(data));
-
-      if (data.role === "seller") navigate("/seller");
-      else if (data.role === "admin") navigate("/admin");
-      else navigate("/home");
+      alert(data.message || "Registration successful. Please verify your email.");
+      setIsFlipped(false);
 
     } catch (error) {
       alert(error.response?.data?.message || "Signup Failed");

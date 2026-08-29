@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const { sendEmail } = require("../utils/email");
 
 const profileFields = [
   "phone",
@@ -41,6 +43,7 @@ const buildUserResponse = (user, token) => {
     postalCode: user.postalCode || "",
     country: user.country || "India",
     businessName: user.businessName || "",
+    isEmailVerified: user.isEmailVerified,
   };
 
   if (token) {
@@ -48,6 +51,22 @@ const buildUserResponse = (user, token) => {
   }
 
   return response;
+};
+
+const createVerificationToken = (user) => {
+  const token = crypto.randomBytes(32).toString("hex");
+  user.emailVerificationToken = crypto.createHash("sha256").update(token).digest("hex");
+  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+  return token;
+};
+
+const sendVerificationEmail = async (user, token) => {
+  const clientUrl = (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
+  await sendEmail({
+    to: user.email,
+    subject: "Verify your ClayOra email address",
+    html: `<p>Hello ${user.name},</p><p>Please verify your email address to activate your ClayOra account.</p><p><a href="${clientUrl}/verify-email?token=${token}">Verify email address</a></p><p>This link expires in 24 hours.</p>`,
+  });
 };
 
 // Generate JWT
@@ -87,7 +106,13 @@ exports.registerUser = async (req, res) => {
       role: safeRole,
     });
 
-    res.status(201).json(buildUserResponse(user, generateToken(user._id)));
+    const verificationToken = createVerificationToken(user);
+    await user.save();
+    await sendVerificationEmail(user, verificationToken);
+
+    res.status(201).json({
+      message: "Registration successful. Check your email to verify your account.",
+    });
 
   } catch (error) {
     console.error(error);
@@ -116,11 +141,54 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+        needsEmailVerification: true,
+      });
+    }
+
     res.status(200).json(buildUserResponse(user, generateToken(user._id)));
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: Date.now() },
+    });
+    if (!user) return res.status(400).json({ message: "This verification link is invalid or has expired." });
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+    res.json({ message: "Email verified. You can now log in." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Unable to verify email" });
+  }
+};
+
+exports.resendVerificationEmail = async (req, res) => {
+  try {
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const user = await User.findOne({ email });
+    if (!user || user.isEmailVerified) return res.json({ message: "If this account needs verification, an email has been sent." });
+
+    const verificationToken = createVerificationToken(user);
+    await user.save();
+    await sendVerificationEmail(user, verificationToken);
+    res.json({ message: "Verification email sent. Please check your inbox." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message || "Unable to send verification email" });
   }
 };
 
