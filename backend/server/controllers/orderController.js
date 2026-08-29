@@ -56,7 +56,8 @@ exports.createOrder = async (req, res) => {
         product: item.product._id,
         quantity: item.quantity,
         price: item.product.price,
-        seller: item.product.seller, // important for seller orders
+        // Always persist the ObjectId, not a populated seller user document.
+        seller: item.product.seller?._id || item.product.seller,
       });
     }
 
