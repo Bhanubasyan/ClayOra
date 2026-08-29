@@ -5,6 +5,33 @@ const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
 const mongoose = require("mongoose");
 
+const escapeHtml = (value) => String(value || "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#039;");
+
+const getDeliveryAddress = (deliveryAddress, buyer) => {
+  const address = {
+    recipientName: String(deliveryAddress?.recipientName || buyer.name || "").trim(),
+    phone: String(deliveryAddress?.phone || "").trim(),
+    alternatePhone: String(deliveryAddress?.alternatePhone || "").trim(),
+    addressLine1: String(deliveryAddress?.addressLine1 || "").trim(),
+    addressLine2: String(deliveryAddress?.addressLine2 || "").trim(),
+    landmark: String(deliveryAddress?.landmark || "").trim(),
+    city: String(deliveryAddress?.city || "").trim(),
+    state: String(deliveryAddress?.state || "").trim(),
+    postalCode: String(deliveryAddress?.postalCode || "").trim(),
+    country: String(deliveryAddress?.country || "India").trim(),
+  };
+  const required = ["recipientName", "phone", "addressLine1", "city", "state", "postalCode", "country"];
+  if (required.some((field) => !address[field])) {
+    throw new Error("Please enter a complete delivery address and mobile number.");
+  }
+  return address;
+};
+
 const extractSellerObjectId = (seller) => {
   // Product.seller can be an ObjectId or a populated User document.
   // Convert either form to a fresh ObjectId before Order validation.
@@ -20,7 +47,7 @@ const extractSellerObjectId = (seller) => {
   return new mongoose.Types.ObjectId(sellerId);
 };
 
-const notifySellersOfOrder = async (order, buyer) => {
+const notifySellersOfOrder = async (order) => {
   const itemsBySeller = new Map();
   order.orderItems.forEach((item) => {
     const sellerId = item.seller?.toString();
@@ -34,10 +61,22 @@ const notifySellersOfOrder = async (order, buyer) => {
   await Promise.allSettled(sellers.map((seller) => {
     const items = itemsBySeller.get(seller._id.toString());
     const lines = items.map((item) => `<li>${item.product.name} — Qty: ${item.quantity}</li>`).join("");
+    const address = order.deliveryAddress;
+    const formattedAddress = [
+      address.addressLine1,
+      address.addressLine2,
+      address.landmark && `Landmark: ${address.landmark}`,
+      [address.city, address.state, address.postalCode].filter(Boolean).join(", "),
+      address.country,
+    ].filter(Boolean).map(escapeHtml).join("<br>");
+    const alternatePhone = address.alternatePhone
+      ? `<br><strong>Alternate phone:</strong> ${escapeHtml(address.alternatePhone)}`
+      : "";
+
     return sendEmail({
       to: seller.email,
       subject: `New order ${order._id}: items to prepare`,
-      html: `<p>Hello ${seller.name},</p><p>${buyer.name} has placed an order containing these items from your store:</p><ul>${lines}</ul><p>Please prepare and pack them for shipment.</p><p>Order ID: ${order._id} </p>`,
+      html: `<p>Hello ${escapeHtml(seller.name)},</p><p>${escapeHtml(address.recipientName)} has placed an order containing these items from your store:</p><ul>${lines}</ul><h3>Delivery details</h3><p><strong>Phone:</strong> ${escapeHtml(address.phone)}${alternatePhone}</p><p><strong>Address:</strong><br>${formattedAddress}</p><p>Please prepare and pack them for shipment.</p><p><strong>Order ID:</strong> ${order._id}</p>`,
     });
   }));
 };
@@ -47,6 +86,7 @@ const notifySellersOfOrder = async (order, buyer) => {
 // @access Private
 exports.createOrder = async (req, res) => {
   try {
+    const deliveryAddress = getDeliveryAddress(req.body.deliveryAddress, req.user);
     const cart = await Cart.findOne({ user: req.user._id })
       .populate("items.product");
 
@@ -81,6 +121,7 @@ exports.createOrder = async (req, res) => {
       user: req.user._id,
       orderItems,
       totalAmount,
+      deliveryAddress,
     });
 
     // Reduce stock after order success
@@ -99,7 +140,7 @@ for (let item of cart.items) {
 
     // A mail delivery problem should never undo a successfully placed order.
     await order.populate("orderItems.product");
-    notifySellersOfOrder(order, req.user).catch((error) =>
+    notifySellersOfOrder(order).catch((error) =>
       console.error("Seller order notification failed:", error.message)
     );
 

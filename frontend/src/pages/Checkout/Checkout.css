@@ -90,6 +90,42 @@
   margin-bottom: 22px;
 }
 
+.delivery-address-section {
+  margin: 20px 0;
+  padding-top: 18px;
+  border-top: 1px solid #eadfd8;
+}
+
+.delivery-address-section h3 {
+  margin-bottom: 12px;
+}
+
+.delivery-address-section > label {
+  display: block;
+  margin: 9px 0;
+}
+
+.saved-address {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff6f1;
+  line-height: 1.5;
+}
+
+.delivery-address-form {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.delivery-address-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
 .payment-options label {
   display: flex;
   align-items: center;

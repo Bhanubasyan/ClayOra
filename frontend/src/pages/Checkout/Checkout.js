@@ -3,15 +3,45 @@ import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import "./Checkout.css";
 
+const emptyDeliveryAddress = {
+  recipientName: "",
+  phone: "",
+  alternatePhone: "",
+  addressLine1: "",
+  addressLine2: "",
+  landmark: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "India",
+};
+
 function Checkout() {
   const [cart, setCart] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [placing, setPlacing] = useState(false);
+  const [addressMode, setAddressMode] = useState("saved");
+  const [deliveryAddress, setDeliveryAddress] = useState(emptyDeliveryAddress);
   const navigate = useNavigate();
 
   useEffect(() => {
     API.get("/cart")
       .then((res) => setCart(res.data))
+      .catch((err) => console.log(err));
+
+    API.get("/auth/profile")
+      .then(({ data }) => setDeliveryAddress({
+        recipientName: data.name || "",
+        phone: data.phone || "",
+        alternatePhone: data.alternatePhone || "",
+        addressLine1: data.addressLine1 || data.address || "",
+        addressLine2: data.addressLine2 || "",
+        landmark: data.landmark || "",
+        city: data.city || "",
+        state: data.state || "",
+        postalCode: data.postalCode || "",
+        country: data.country || "India",
+      }))
       .catch((err) => console.log(err));
   }, []);
 
@@ -30,7 +60,7 @@ function Checkout() {
     });
 
   const placeCodOrder = async () => {
-    await API.post("/orders", { paymentMethod: "COD" });
+    await API.post("/orders", { paymentMethod: "COD", deliveryAddress });
     navigate("/success");
   };
 
@@ -86,6 +116,10 @@ function Checkout() {
   }
   };
 
+  const handleAddressChange = (event) => {
+    setDeliveryAddress((current) => ({ ...current, [event.target.name]: event.target.value }));
+  };
+
   if (!cart || !cart.items || cart.items.length === 0) {
     return <h2>Your cart is empty</h2>;
   }
@@ -134,6 +168,50 @@ function Checkout() {
         <p className="summary-total">
           Total: Rs. {total}
         </p>
+
+        <div className="delivery-address-section">
+          <h3>Delivery Address</h3>
+          <label>
+            <input
+              type="radio"
+              name="addressMode"
+              checked={addressMode === "saved"}
+              onChange={() => setAddressMode("saved")}
+            />
+            Use saved profile address
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="addressMode"
+              checked={addressMode === "new"}
+              onChange={() => setAddressMode("new")}
+            />
+            Enter a different address
+          </label>
+
+          {addressMode === "saved" ? (
+            <p className="saved-address">
+              {deliveryAddress.recipientName}<br />
+              {deliveryAddress.phone}<br />
+              {deliveryAddress.addressLine1}, {deliveryAddress.addressLine2}<br />
+              {deliveryAddress.city}, {deliveryAddress.state} - {deliveryAddress.postalCode}
+            </p>
+          ) : (
+            <div className="delivery-address-form">
+              <input name="recipientName" value={deliveryAddress.recipientName} onChange={handleAddressChange} placeholder="Recipient name" required />
+              <input name="phone" value={deliveryAddress.phone} onChange={handleAddressChange} placeholder="Mobile number" required />
+              <input name="alternatePhone" value={deliveryAddress.alternatePhone} onChange={handleAddressChange} placeholder="Alternate mobile (optional)" />
+              <input name="addressLine1" value={deliveryAddress.addressLine1} onChange={handleAddressChange} placeholder="Address line 1" required />
+              <input name="addressLine2" value={deliveryAddress.addressLine2} onChange={handleAddressChange} placeholder="Address line 2 (optional)" />
+              <input name="landmark" value={deliveryAddress.landmark} onChange={handleAddressChange} placeholder="Landmark (optional)" />
+              <input name="city" value={deliveryAddress.city} onChange={handleAddressChange} placeholder="City" required />
+              <input name="state" value={deliveryAddress.state} onChange={handleAddressChange} placeholder="State" required />
+              <input name="postalCode" value={deliveryAddress.postalCode} onChange={handleAddressChange} placeholder="PIN code" required />
+              <input name="country" value={deliveryAddress.country} onChange={handleAddressChange} placeholder="Country" required />
+            </div>
+          )}
+        </div>
 
         <div className="payment-options">
           <label>
