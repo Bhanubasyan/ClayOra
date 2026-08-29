@@ -141,7 +141,9 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    if (!user.isEmailVerified) {
+    // Administrators are created and controlled internally, so they do not need
+    // to be blocked by customer email verification.
+    if (user.role !== "admin" && !user.isEmailVerified) {
       return res.status(403).json({
         message: "Please verify your email before logging in.",
         needsEmailVerification: true,
