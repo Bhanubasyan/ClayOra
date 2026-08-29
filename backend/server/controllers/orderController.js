@@ -4,6 +4,13 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
 
+const escapeHtml = (value) => String(value || "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#039;");
+
 const notifySellersOfOrder = async (order, buyer) => {
   const itemsBySeller = new Map();
   order.orderItems.forEach((item) => {
@@ -18,10 +25,21 @@ const notifySellersOfOrder = async (order, buyer) => {
   await Promise.allSettled(sellers.map((seller) => {
     const items = itemsBySeller.get(seller._id.toString());
     const lines = items.map((item) => `<li>${item.product.name} — Qty: ${item.quantity}</li>`).join("");
+    const address = [
+      buyer.addressLine1 || buyer.address,
+      buyer.addressLine2,
+      buyer.landmark && `Landmark: ${buyer.landmark}`,
+      [buyer.city, buyer.state, buyer.postalCode].filter(Boolean).join(", "),
+      buyer.country,
+    ].filter(Boolean).map(escapeHtml).join("<br>");
+    const alternatePhone = buyer.alternatePhone
+      ? `<br>Alternate phone: ${escapeHtml(buyer.alternatePhone)}`
+      : "";
+
     return sendEmail({
       to: seller.email,
       subject: `New order ${order._id}: items to prepare`,
-      html: `<p>Hello ${seller.name},</p><p>${buyer.name} has placed an order containing these items from your store:</p><ul>${lines}</ul><p>Please prepare and pack them for shipment.</p><p>Order ID: ${order._id}</p>`,
+      html: `<p>Hello ${escapeHtml(seller.name)},</p><p>${escapeHtml(buyer.name)} has placed an order containing these items from your store:</p><ul>${lines}</ul><h3>Buyer delivery details</h3><p><strong>Phone:</strong> ${escapeHtml(buyer.phone) || "Not provided"}${alternatePhone}</p><p><strong>Delivery address:</strong><br>${address || "Not provided"}</p><p>Please prepare and pack them for shipment.</p><p><strong>Order ID:</strong> ${order._id}</p>`,
     });
   }));
 };
