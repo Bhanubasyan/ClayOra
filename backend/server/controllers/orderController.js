@@ -3,6 +3,22 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
+const mongoose = require("mongoose");
+
+const extractSellerObjectId = (seller) => {
+  // Product.seller can be an ObjectId or a populated User document.
+  // Convert either form to a fresh ObjectId before Order validation.
+  const rawSellerId = seller && typeof seller === "object" && seller._id
+    ? seller._id
+    : seller;
+  const sellerId = rawSellerId?.toString();
+
+  if (!mongoose.isObjectIdOrHexString(sellerId)) {
+    throw new Error("This product has an invalid seller ID. Please contact support.");
+  }
+
+  return new mongoose.Types.ObjectId(sellerId);
+};
 
 const notifySellersOfOrder = async (order, buyer) => {
   const itemsBySeller = new Map();
@@ -56,8 +72,7 @@ exports.createOrder = async (req, res) => {
         product: item.product._id,
         quantity: item.quantity,
         price: item.product.price,
-        // Always persist the ObjectId, not a populated seller user document.
-        seller: item.product.seller?._id || item.product.seller,
+        seller: extractSellerObjectId(item.product.seller),
       });
     }
 
