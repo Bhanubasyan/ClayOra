@@ -17,13 +17,15 @@ function Auth() {
       const { data } = await API.post("/auth/login", {
         email,
         password,
+        role,
       });
 
+      localStorage.removeItem("token");
       localStorage.setItem("user", JSON.stringify(data));
 
-      if (data.role === "seller") navigate("/seller");
-      else if (data.role === "admin") navigate("/admin");
-      else navigate("/home");
+      if (data.role === "seller") window.location.assign("/seller");
+      else if (data.role === "admin") window.location.assign("/admin");
+      else window.location.assign("/home");
 
     } catch (error) {
       const response = error.response?.data;

@@ -123,7 +123,7 @@ exports.registerUser = async (req, res) => {
 // ================= LOGIN =================
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -147,6 +147,13 @@ exports.loginUser = async (req, res) => {
       return res.status(403).json({
         message: "Please verify your email before logging in.",
         needsEmailVerification: true,
+      });
+    }
+
+    // The login toggle must match the account type. Admin login remains direct.
+    if (["buyer", "seller"].includes(role) && user.role !== "admin" && user.role !== role) {
+      return res.status(403).json({
+        message: `This email is registered as a ${user.role}. Please select ${user.role} before logging in.`,
       });
     }
 

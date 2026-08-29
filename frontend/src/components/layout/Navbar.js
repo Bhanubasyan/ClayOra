@@ -16,7 +16,7 @@ function Navbar() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-  }, []);
+  }, [location.pathname]);
 
   /* ===== Scroll Effect ===== */
   useEffect(() => {
