@@ -22,6 +22,7 @@ import SellerProducts from "./pages/Seller/SellerProducts";
 import AddProduct from "./pages/Seller/AddProduct";
 import SellerOrders from "./pages/Seller/SellerOrders";
 import EditProduct from "./pages/Seller/EditProduct";
+import SellerProfile from "./pages/Seller/SellerProfile";
 
 // Components
 import AdminRoute from "./components/admin/AdminRoute";
@@ -74,6 +75,7 @@ function App() {
             <Route path="products" element={<SellerProducts />} />
             <Route path="add-product" element={<AddProduct />} />
             <Route path="orders" element={<SellerOrders />} />
+            <Route path="profile" element={<SellerProfile />} />
             <Route path="edit-product/:id" element={<EditProduct />} />
           </Route>
 

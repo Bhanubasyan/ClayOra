@@ -108,6 +108,73 @@
 }
 
 /* ===============================
+   SELLER PROFILE
+================================== */
+.seller-profile-card {
+    max-width: 900px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 34px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.06);
+}
+
+.seller-profile-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.seller-profile-heading p {
+    margin: 0 0 4px;
+    color: #C65D3B;
+    font-weight: 700;
+}
+
+.seller-profile-heading h2 { margin: 0 0 6px; }
+.seller-profile-heading span { color: #7a6f68; }
+
+.seller-profile-avatar {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    color: #fff;
+    background: #C65D3B;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.seller-profile-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.seller-profile-form label {
+    display: grid;
+    gap: 7px;
+    color: #453c37;
+    font-weight: 600;
+}
+
+.seller-profile-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.seller-profile-form input:disabled { background: #f6f3f1; }
+.seller-profile-full { grid-column: 1 / -1; }
+
+/* ===============================
    ADD PRODUCT
 ================================== */
 
@@ -455,6 +522,9 @@ padding:20px;
 .analytics-grid {
 grid-template-columns:1fr;
 }
+
+.seller-profile-form { grid-template-columns: 1fr; }
+.seller-profile-full { grid-column: auto; }
 
 .add-product-card,
 .edit-product-card{

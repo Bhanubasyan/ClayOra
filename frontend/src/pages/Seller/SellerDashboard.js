@@ -24,6 +24,7 @@ function SellerDashboard() {
           <Link to="/seller/products">Products</Link>
           <Link to="/seller/add-product">Add Product</Link>
           <Link to="/seller/orders">Orders</Link>
+          <Link to="/seller/profile">Profile</Link>
         </div>
       </div>
 
