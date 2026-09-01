@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import "./Auth.css";
 
 function Auth() {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
   const [role, setRole] = useState("buyer");
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -64,9 +63,19 @@ function Auth() {
     }
   };
 
+  const handleForgotPassword = async (e) =>{
+ e.preventDefault();
+ const email = e.target.email.value;
+ try{
+  const {data} = await API.post("/auth/forgot-password", {email});
+  alert(data.message);
+ }catch(error){
+  alert(error.response?.data?.message || "Sommething went wrong");
+ }
+  };
   return (
     <div className="auth-container">
-      <div className={`flip-card ${isFlipped ? "flipped" : ""}`}>
+      <div className={`flip-card ${isFlipped ? "flipped" : ""} ${isForgot ? "forgot" : ""}`}>
         <div className="flip-card-inner">
 
           {/* LOGIN SIDE */}
@@ -96,6 +105,16 @@ function Auth() {
               <button type="submit">Login</button>
             </form>
 
+            <p
+              className="switch-text"
+              onClick={() => {
+                setIsForgot(true);
+                setIsFlipped(false);
+              }}
+            >
+              Forgot Password?
+            </p>
+
             <p>
               Don't have an account?{" "}
               <span className="switch-text" onClick={() => setIsFlipped(true)}>
@@ -103,6 +122,27 @@ function Auth() {
               </span>
             </p>
           </div>
+
+          {/* Forgot Password*/}
+             <div className="flip-card-upward">
+              <h2>Forgot Password</h2>
+
+            <form onSubmit={handleForgotPassword}>
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+            />
+
+            <button type="submit">Send Reset Link</button>
+            </form>
+
+            <p className="switch-text" onClick={() => setIsForgot(false)}>
+              Back to Login
+            </p>
+             </div>
+
 
           {/* REGISTER SIDE */}
           <div className="flip-card-back">

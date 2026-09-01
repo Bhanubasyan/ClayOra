@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing/Landing";
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
+import ResetPassword from "./pages/Auth/ResetPassword";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout/Checkout";
@@ -44,6 +45,12 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+
+
+          <Route path="/reset-password" element={<ResetPassword />}/>
+
+<Route path="/reset-password/:token" element={<ResetPassword />}/>
+
           <Route path="/login" element={<Auth />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetails />} />

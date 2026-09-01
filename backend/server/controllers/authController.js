@@ -165,6 +165,80 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+//================= Forgot Password======
+exports.forgotPassword = async (req, res) => {
+  try {
+    const email = String(req.body.email || "").toLowerCase().trim();
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({ message: "If an account exists, a reset link has been sent." });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const clientUrl = (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
+    const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Reset your ClayOra password",
+      html: `<p>Hello ${user.name},</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 15 minutes.</p>`,
+    });
+
+    res.json({ message: "If an account exists, a reset link has been sent." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Unable to send reset email" });
+  }
+};
+
+//========================= Reset Password ====================
+exports.resetPassword = async (req, res) => {
+  try{
+    const {token} = req.params;
+    const {password} = req.body;
+
+    if(!password){
+      return res.status(404).json({message:"Password is required"});
+    }
+
+    const hasedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hasedToken,
+      resetPasswordExpire: {$gt: Date.now()},
+    });
+
+    if(!user){
+      return res.status(400).json({message: "Invalid or expired reset token"});
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+ res.status(200).json({message: "Password reset successfully"});
+  }catch(error){
+    console.error(error);
+    res.status(500).json({message: "Something went wrong"})
+  }
+};
+
 exports.verifyEmail = async (req, res) => {
   try {
     const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
