@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const { sendEmail } = require("../utils/email");
 
 const profileFields = [
@@ -181,15 +182,16 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    user.passwordResetToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.passwordResetToken = hashedToken;
     user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
 
     const clientUrl = (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
-    const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
 
     await sendEmail({
       to: user.email,
@@ -206,23 +208,29 @@ exports.forgotPassword = async (req, res) => {
 
 //========================= Reset Password ====================
 exports.resetPassword = async (req, res) => {
-  try{
-    const {token} = req.params;
-    const {password} = req.body;
+  try {
+    const token = req.params.token || req.body.token || req.query.token;
+    const { password } = req.body;
 
-    if(!password){
-      return res.status(404).json({message:"Password is required"});
+    if (!token) {
+      return res.status(400).json({ message: "Reset token is missing" });
     }
 
-    const hasedToken = crypto.createHash("sha256").update(token).digest("hex");
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
-      resetPasswordToken: hasedToken,
-      resetPasswordExpire: {$gt: Date.now()},
+      $or: [
+        { resetPasswordToken: hashedToken, resetPasswordExpire: { $gt: Date.now() } },
+        { passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } },
+      ],
     });
 
-    if(!user){
-      return res.status(400).json({message: "Invalid or expired reset token"});
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -230,12 +238,14 @@ exports.resetPassword = async (req, res) => {
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
 
     await user.save();
- res.status(200).json({message: "Password reset successfully"});
-  }catch(error){
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
     console.error(error);
-    res.status(500).json({message: "Something went wrong"})
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
