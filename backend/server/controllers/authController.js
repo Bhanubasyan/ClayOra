@@ -184,6 +184,10 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
+    // check token by console 
+    console.log("RAW RESET TOKEN: ", resetToken);
+    console.log("Hased token : " , hashedToken);
+
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
     user.resetPasswordToken = hashedToken;
@@ -242,6 +246,12 @@ exports.resetPassword = async (req, res) => {
     user.passwordResetExpires = undefined;
 
     await user.save();
+    // console log//
+    
+    console.log("USER RESET TOKEN IN DB : ", user.resetPasswordToken);
+    console.log("USER RESET EXPIRE: ", user.resetPasswordExpire);
+
+    
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     console.error(error);
