@@ -86,8 +86,7 @@ const userSchema = new mongoose.Schema(
     },
     emailVerificationToken: String,
     emailVerificationExpires: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
+    
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

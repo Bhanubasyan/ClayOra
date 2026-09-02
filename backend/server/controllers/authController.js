@@ -188,8 +188,7 @@ exports.forgotPassword = async (req, res) => {
     console.log("RAW RESET TOKEN: ", resetToken);
     console.log("Hased token : " , hashedToken);
 
-    user.passwordResetToken = hashedToken;
-    user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
@@ -237,8 +236,8 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired reset token" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    
+    user.password = password;
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
