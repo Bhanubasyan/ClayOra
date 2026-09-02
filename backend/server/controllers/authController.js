@@ -238,6 +238,12 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
+
+    console.log("TOKEN RECEIVED:", token);
+console.log("PASSWORD LENGTH:", password && password.length);
+console.log("USER FOUND:", !!user);
+console.log("USER EMAIL:", user && user.email);
+console.log("USER PASSWORD BEFORE SAVE:", user && user.password);
     await user.save();
 
     console.log("USER RESET TOKEN IN DB : ", user.resetPasswordToken);
