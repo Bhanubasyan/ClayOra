@@ -213,7 +213,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const token = req.params.token || req.body.token || req.query.token;
-    const { password } = req.body;
+    const password = String(req.body.password || "");
 
     if (!token) {
       return res.status(400).json({ message: "Reset token is missing" });
@@ -221,6 +221,10 @@ exports.resetPassword = async (req, res) => {
 
     if (!password) {
       return res.status(400).json({ message: "Password is required" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -240,7 +244,7 @@ exports.resetPassword = async (req, res) => {
 
 
     console.log("TOKEN RECEIVED:", token);
-console.log("PASSWORD LENGTH:", password && password.length);
+  console.log("PASSWORD LENGTH:", password.length);
 console.log("USER FOUND:", !!user);
 console.log("USER EMAIL:", user && user.email);
 console.log("USER PASSWORD BEFORE SAVE:", user && user.password);
@@ -252,7 +256,7 @@ console.log("USER PASSWORD BEFORE SAVE:", user && user.password);
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: error.message || "Something went wrong" });
   }
 };
 
