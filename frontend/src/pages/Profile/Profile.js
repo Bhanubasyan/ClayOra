@@ -358,6 +358,26 @@ function Profile() {
               <div className="orders-list">
                 {orders.map((order) => (
                   <div key={order._id} className="order-card">
+                    
+                    /* product image in profile section  */
+
+                  <div className="order-products">
+  {order.orderItems?.map((item) => (
+    <div key={item._id} className="order-product">
+      <img
+        src={item.product?.image}
+        alt={item.product?.name || "Product"}
+      />
+
+      <div>
+        <strong>{item.product?.name || "Product unavailable"}</strong>
+        <span>Qty: {item.quantity}</span>
+      </div>
+    </div>
+  ))}
+</div>
+
+
                     <div className="order-info">
                       <span>Order ID</span>
                       <strong>{order._id}</strong>

@@ -430,3 +430,38 @@
     align-items: flex-start;
   }
 }
+
+
+.order-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.order-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.order-product img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eadfd8;
+  background: #f7f1ec;
+}
+
+.order-product strong,
+.order-product span {
+  display: block;
+}
+
+.order-product span {
+  margin-top: 5px;
+  color: #8a7c74;
+  font-size: 13px;
+}
