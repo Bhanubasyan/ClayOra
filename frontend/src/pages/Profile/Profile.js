@@ -359,7 +359,7 @@ function Profile() {
                 {orders.map((order) => (
                   <div key={order._id} className="order-card">
                     
-                    /* product image in profile section  */
+                    
 
                   <div className="order-products">
   {order.orderItems?.map((item) => (
