@@ -45,6 +45,10 @@ app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/seller", require("./routes/sellerRoutes"));
+// Interview feature: Razorpay endpoints are mounted separately from order APIs for clear payment boundaries.
+app.use("/api/payments", require("./routes/paymentRoutes"));
+// Wishlist feature: mounts the authenticated saved-products API used by the customer pages.
+app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
 /* ================================
    HEALTH CHECK

@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Order = require("../models/Order");
 
 // @desc    Create Product
 // @route   POST /api/products
@@ -55,6 +56,9 @@ exports.getProducts = async (req, res) => {
       tag,
       minPrice,
       maxPrice,
+      minRating,
+      availability,
+      sort = "newest",
       page = 1,
       limit = 10,
     } = req.query;
@@ -86,11 +90,24 @@ if (tag) {
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
+    // Interview feature: supports rating and stock filters from the customer catalogue.
+    if (minRating) query.rating = { $gte: Number(minRating) };
+    if (availability === "in-stock") query.stock = { $gt: 0 };
+
+    // Interview feature: allowlisted sorting prevents arbitrary client-provided database sorting.
+    const sortOptions = {
+      newest: { createdAt: -1 },
+      price_low: { price: 1 },
+      price_high: { price: -1 },
+      rating: { rating: -1, numReviews: -1 },
+    };
+
     
  console.log(query);
 
 
  const products = await Product.find(query)
+   .sort(sortOptions[sort] || sortOptions.newest)
    .limit(Number(limit))
     .skip((Number(page) - 1) * Number(limit));
 
@@ -105,6 +122,45 @@ if (tag) {
 
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Interview feature: accepts reviews only from customers who bought and received the product.
+exports.createProductReview = async (req, res) => {
+  try {
+    const rating = Number(req.body.rating);
+    const comment = String(req.body.comment || "").trim();
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5 || !comment) {
+      return res.status(400).json({ message: "Please provide a rating from 1 to 5 and a review." });
+    }
+
+    const deliveredOrder = await Order.exists({
+      user: req.user._id,
+      status: "Delivered",
+      "orderItems.product": product._id,
+    });
+    if (!deliveredOrder) {
+      return res.status(403).json({ message: "Only customers with a delivered purchase can review this product." });
+    }
+
+    const existingReview = product.reviews.find((item) => item.user.equals(req.user._id));
+    if (existingReview) {
+      existingReview.rating = rating;
+      existingReview.comment = comment;
+      existingReview.name = req.user.name;
+    } else {
+      product.reviews.push({ user: req.user._id, name: req.user.name, rating, comment });
+    }
+    product.numReviews = product.reviews.length;
+    product.rating = product.numReviews
+      ? Number((product.reviews.reduce((sum, item) => sum + item.rating, 0) / product.numReviews).toFixed(1))
+      : 0;
+    await product.save();
+    res.status(201).json({ message: "Review saved", rating: product.rating, numReviews: product.numReviews });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

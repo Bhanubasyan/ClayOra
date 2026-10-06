@@ -15,6 +15,7 @@ const {
   approveProduct,
   unapproveProduct,
   getAdminProducts,
+  createProductReview,
 } = require("../controllers/productController");
 
 
@@ -55,6 +56,9 @@ router.post(
 
 // Get seller's own products
 router.get("/my-products", protect, seller, getMyProducts);
+
+// Interview feature: the protected review endpoint enforces verified-buyer reviews in its controller.
+router.post("/:id/reviews", protect, createProductReview);
 
 
 // =========================

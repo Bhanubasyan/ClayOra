@@ -89,6 +89,8 @@ const userSchema = new mongoose.Schema(
     
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    // Wishlist feature: saves product references on the account so favourites follow the user across devices.
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   },
   { timestamps: true }
 );

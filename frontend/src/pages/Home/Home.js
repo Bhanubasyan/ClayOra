@@ -46,6 +46,8 @@ const tag = new URLSearchParams(location.search).get("tag");
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  // Interview feature: catalogue filter state provides a richer buying experience without changing existing search.
+  const [filters, setFilters] = useState({ minPrice: "", maxPrice: "", minRating: "", availability: "", sort: "newest" });
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -64,12 +66,14 @@ const tag = new URLSearchParams(location.search).get("tag");
   }, [heroImages.length]);
 
   /* ================= FETCH PRODUCTS ================= */
-  const fetchProducts = useCallback(async (keyword = "", selectedCategory = "") => {
+  // Previous simple fetch signature: const fetchProducts = useCallback(async (keyword = "", selectedCategory = "") => {
+  const fetchProducts = useCallback(async (keyword = "", selectedCategory = "", nextFilters = filters) => {
     try {
       setLoading(true);
       setError("");
 
-      let url = `/products?keyword=${keyword}`;
+      // Previous simple URL: let url = `/products?keyword=${keyword}`;
+      let url = `/products?keyword=${encodeURIComponent(keyword)}&sort=${nextFilters.sort}`;
 
 if (selectedCategory) {
   url += `&category=${selectedCategory}`;
@@ -78,6 +82,12 @@ if (selectedCategory) {
 if (tag) {
   url += `&tag=${encodeURIComponent(tag)}`;
 }
+
+// Interview feature: only include selected filters, preserving the original simple search URL when unused.
+if (nextFilters.minPrice) url += `&minPrice=${nextFilters.minPrice}`;
+if (nextFilters.maxPrice) url += `&maxPrice=${nextFilters.maxPrice}`;
+if (nextFilters.minRating) url += `&minRating=${nextFilters.minRating}`;
+if (nextFilters.availability) url += `&availability=${nextFilters.availability}`;
 
 console.log("TAG =", tag);
 console.log("URL =", url);
@@ -93,7 +103,7 @@ setProducts(res.data.products);
     } finally {
       setLoading(false);
     }
-  }, [tag]);
+  }, [tag, filters]);
 
 const categories = [
   { name: "Home Decor", icon: <FaHome /> },
@@ -158,6 +168,13 @@ const categories = [
     fetchProducts(search, selected);
   };
 
+  // Interview feature: applies price, rating, stock, and sorting options in a single customer-friendly control.
+  const handleFilterChange = (event) => {
+    const nextFilters = { ...filters, [event.target.name]: event.target.value };
+    setFilters(nextFilters);
+    fetchProducts(search, category, nextFilters);
+  };
+
   const addToCart = async (productId) => {
     try {
       await API.post("/cart", {
@@ -166,8 +183,13 @@ const categories = [
       });
       alert("Added to Cart!");
     } catch (error) {
-      alert("Please login first");
-      navigate("/login");
+      // Wishlist feature: distinguish a real expired-login response from an API or server error.
+      if (error.response?.status === 401) {
+        alert("Please login first");
+        navigate("/login");
+      } else {
+        alert(error.response?.data?.message || "Unable to update wishlist. Please try again.");
+      }
     }
   };
 
@@ -262,6 +284,23 @@ const categories = [
             <option value="">Categories</option>
             <option value="Pottery">Pottery</option>
             <option value="Wood">Wood</option>
+          </select>
+          <input name="minPrice" type="number" min="0" placeholder="Min price" value={filters.minPrice} onChange={handleFilterChange} className="advanced-filter" />
+          <input name="maxPrice" type="number" min="0" placeholder="Max price" value={filters.maxPrice} onChange={handleFilterChange} className="advanced-filter" />
+          <select name="minRating" value={filters.minRating} onChange={handleFilterChange} className="advanced-filter">
+            <option value="">Any rating</option>
+            <option value="4">4★ & above</option>
+            <option value="3">3★ & above</option>
+          </select>
+          <select name="availability" value={filters.availability} onChange={handleFilterChange} className="advanced-filter">
+            <option value="">All availability</option>
+            <option value="in-stock">In stock</option>
+          </select>
+          <select name="sort" value={filters.sort} onChange={handleFilterChange} className="advanced-filter">
+            <option value="newest">Newest</option>
+            <option value="price_low">Price: low to high</option>
+            <option value="price_high">Price: high to low</option>
+            <option value="rating">Top rated</option>
           </select>
         </div>
   

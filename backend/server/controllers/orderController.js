@@ -122,6 +122,10 @@ exports.createOrder = async (req, res) => {
       orderItems,
       totalAmount,
       deliveryAddress,
+      // Interview feature: COD remains the safe existing default while payment metadata is now persisted.
+      paymentMethod: req.body.paymentMethod === "Razorpay" ? "Razorpay" : "COD",
+      paymentStatus: req.body.paymentMethod === "Razorpay" ? "Pending" : "Pending",
+      statusHistory: [{ status: "Pending", note: "Order placed" }],
     });
 
     // Reduce stock after order success
@@ -198,6 +202,8 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     order.status = status || order.status;
+    // Interview feature: retain each admin status change for customer tracking.
+    order.statusHistory.push({ status: order.status, note: req.body.note || "Status updated by admin" });
 
     await order.save();
 
@@ -240,6 +246,8 @@ exports.updateSellerOrderStatus = async (req, res) => {
     }
 
     order.status = status;
+    // Interview feature: seller updates become visible in the customer order timeline.
+    order.statusHistory.push({ status, note: req.body.note || "Updated by seller" });
     await order.save();
 
     res.status(200).json(order);
@@ -302,6 +310,8 @@ exports.cancelOrder = async (req, res) => {
     }
 
     order.status = "Cancelled";
+    // Interview feature: a cancellation is also represented in the immutable status history.
+    order.statusHistory.push({ status: "Cancelled", note: "Cancelled by customer" });
     await order.save();
 
     res.status(200).json({
@@ -311,6 +321,50 @@ exports.cancelOrder = async (req, res) => {
 
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Interview feature: lets a buyer track only their own order, including history and payment status.
+exports.trackOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id })
+      .populate("orderItems.product", "name image");
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Unable to track this order" });
+  }
+};
+
+// Interview feature: calculates only this seller's item revenue, units, orders, best sellers, and stock alerts.
+exports.getSellerAnalytics = async (req, res) => {
+  try {
+    const sellerId = req.user._id;
+    const orders = await Order.find({ "orderItems.seller": sellerId, status: { $ne: "Cancelled" } });
+    const sellerItems = orders.flatMap((order) => order.orderItems
+      .filter((item) => item.seller?.equals(sellerId))
+      .map((item) => ({ ...item.toObject(), status: order.status })));
+    const revenue = sellerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const productTotals = new Map();
+    sellerItems.forEach((item) => {
+      const key = item.product.toString();
+      const current = productTotals.get(key) || { product: key, unitsSold: 0, revenue: 0 };
+      current.unitsSold += item.quantity;
+      current.revenue += item.price * item.quantity;
+      productTotals.set(key, current);
+    });
+    const lowStockProducts = await Product.find({ seller: sellerId, stock: { $lte: 5 } })
+      .select("name stock image").sort({ stock: 1 }).limit(5);
+    res.json({
+      revenue,
+      activeOrders: orders.filter((order) => !["Delivered", "Cancelled"].includes(order.status)).length,
+      deliveredOrders: orders.filter((order) => order.status === "Delivered").length,
+      unitsSold: sellerItems.reduce((sum, item) => sum + item.quantity, 0),
+      topProducts: [...productTotals.values()].sort((a, b) => b.unitsSold - a.unitsSold).slice(0, 5),
+      lowStockProducts,
+    });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

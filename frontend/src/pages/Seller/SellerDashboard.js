@@ -67,6 +67,18 @@ function SellerDashboard() {
                 <p>No low stock products from recent orders.</p>
               )}
             </div>
+
+            {/* Interview feature: makes the seller's highest-performing products clear during a short dashboard demo. */}
+            <div className="low-stock-panel">
+              <h3>Best-selling Products</h3>
+              {analytics?.topProducts?.length ? (
+                analytics.topProducts.map((product) => (
+                  <p key={product.product}>
+                    {product.unitsSold} units sold <span>Rs. {product.revenue}</span>
+                  </p>
+                ))
+              ) : <p>Sales data will appear after your first order.</p>}
+            </div>
           </div>
         ) : (
           <Outlet />

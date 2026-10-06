@@ -49,6 +49,19 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Processing", "Shipped", "Delivered","Cancelled"],
       default: "Pending",
     },
+    // Interview feature: records the customer-selected payment method and its verified outcome.
+    paymentMethod: { type: String, enum: ["COD", "Razorpay"], default: "COD" },
+    paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
+    razorpayOrderId: { type: String, default: "" },
+    razorpayPaymentId: { type: String, default: "" },
+    // Interview feature: preserves a readable audit trail for the customer order timeline.
+    statusHistory: [
+      {
+        status: { type: String, required: true },
+        note: { type: String, trim: true, default: "" },
+        updatedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

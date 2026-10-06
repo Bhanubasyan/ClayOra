@@ -134,6 +134,16 @@
   padding: 14px 0;
 }
 
+/* Interview feature: compact review totals complement the detailed customer comments. */
+.rating-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #6b5f58;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .review-card span {
   color: #c65d3b;
   font-weight: 800;

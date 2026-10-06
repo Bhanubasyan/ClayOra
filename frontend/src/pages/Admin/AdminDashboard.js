@@ -4,6 +4,8 @@ import "./Admin.css";
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
+  // Interview feature: marketplace metrics make the admin page operational rather than only a moderation screen.
+  const [insights, setInsights] = useState(null);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -19,6 +21,8 @@ function AdminDashboard() {
       setError("");
       const res = await API.get("/products/admin/all");
       setProducts(res.data.products);
+      const insightRes = await API.get("/admin/insights");
+      setInsights(insightRes.data);
     } catch (err) {
       console.log(err);
       setError("Unable to load products. Make sure you are logged in as admin.");
@@ -84,6 +88,14 @@ return (
   <div className="admin-container">
 
     <h2 className="admin-title">Admin Dashboard</h2>
+
+    {/* Interview feature: concise marketplace health cards for users, sellers, approvals, and revenue. */}
+    <div className="admin-insights">
+      <div><span>Users</span><strong>{insights?.totalUsers || 0}</strong></div>
+      <div><span>Sellers</span><strong>{insights?.sellers || 0}</strong></div>
+      <div><span>Pending approvals</span><strong>{insights?.pendingProducts || 0}</strong></div>
+      <div><span>Marketplace revenue</span><strong>Rs. {insights?.revenue || 0}</strong></div>
+    </div>
 
     {/* CREATE PRODUCT */}
     <div className="admin-form-card">

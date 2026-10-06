@@ -35,8 +35,13 @@ function ProductDetails() {
       alert("Added to Cart!");
       navigate("/cart");
     } catch (error) {
-      alert("Please login first");
-      navigate("/auth");
+      // Wishlist feature: retain login guidance only for a true unauthorized response.
+      if (error.response?.status === 401) {
+        alert("Please login first");
+        navigate("/auth");
+      } else {
+        alert(error.response?.data?.message || "Unable to update wishlist. Please try again.");
+      }
     }
   };
 
@@ -69,6 +74,12 @@ function ProductDetails() {
   };
 
   if (!product) return <h2>Loading...</h2>;
+
+  // Interview feature: a familiar rating breakdown helps customers judge product quality at a glance.
+  const ratingBreakdown = [5, 4, 3, 2, 1].map((rating) => ({
+    rating,
+    count: product.reviews?.filter((item) => Number(item.rating) === rating).length || 0,
+  }));
 
  return (
   <div className="product-detail-container">
@@ -133,6 +144,11 @@ function ProductDetails() {
     <section className="reviews-section">
       <div className="reviews-list">
         <h3>Customer Reviews</h3>
+        <div className="rating-breakdown">
+          {ratingBreakdown.map((item) => (
+            <span key={item.rating}>{item.rating}★: {item.count}</span>
+          ))}
+        </div>
         {product.reviews?.length ? (
           product.reviews.map((item) => (
             <div className="review-card" key={item._id}>

@@ -121,6 +121,14 @@
   border: 1px solid #ddd;
 }
 
+/* Interview feature: shared visual treatment keeps advanced filters consistent with the original category filter. */
+.advanced-filter {
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  min-width: 120px;
+}
+
 .product-link {
   text-decoration: none !important;
   color: #3e3e3e !important;
@@ -240,6 +248,10 @@
   }
 
   .category-dropdown {
+    width: 100%;
+  }
+
+  .advanced-filter {
     width: 100%;
   }
 }

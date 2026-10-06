@@ -72,7 +72,9 @@ function Checkout() {
       return;
     }
 
-    const res = await API.post("/payments/razorpay-order");
+    // Previous request omitted the address, so it could not create a complete pending order: API.post("/payments/razorpay-order").
+    // Interview feature: send the delivery data before Razorpay opens so the server can create a pending secure order.
+    const res = await API.post("/payments/razorpay-order", { deliveryAddress });
     const { key, razorpayOrder } = res.data;
 
     const user = JSON.parse(localStorage.getItem("user")) || {};
@@ -89,9 +91,18 @@ function Checkout() {
         email: user.email,
       },
       handler: async (response) => {
-        await API.post("/payments/verify", response);
-        navigate("/success");
+        // Previous direct verification/navigation is retained as reference; it had no failure feedback:
+        // await API.post("/payments/verify", response); navigate("/success");
+        try {
+          // Interview feature: the server verifies Razorpay's signature before confirming the purchase.
+          await API.post("/payments/verify", response);
+          navigate("/success");
+        } catch (error) {
+          alert(error.response?.data?.message || "Payment could not be verified. Please contact support before retrying.");
+        }
       },
+      // Interview feature: customers receive clear feedback if they close the secure payment window.
+      modal: { ondismiss: () => alert("Payment was not completed. Your cart is unchanged.") },
       theme: {
         color: "#C65D3B",
       },
