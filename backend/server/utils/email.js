@@ -32,6 +32,7 @@ exports.sendEmail = async ({ to, subject, html }) => {
 
   if (!response.ok) {
     const details = await response.text();
+    // Email reliability fix: preserve the Brevo response in server logs without exposing API keys.
     throw new Error(`Brevo email request failed (${response.status}): ${details}`);
   }
 

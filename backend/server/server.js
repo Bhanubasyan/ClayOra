@@ -6,7 +6,9 @@ const path = require("path");
 
 const connectDB = require("./config/db");
 
-dotenv.config();
+// Email reliability fix: always load the server-local .env file, even when Node starts from the repository root.
+// Previous dotenv.config() only searched the current terminal folder, which could omit Brevo settings.
+dotenv.config({ path: path.join(__dirname, ".env") });
 connectDB();
 
 const app = express();
