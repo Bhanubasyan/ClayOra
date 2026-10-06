@@ -28,7 +28,7 @@ Crafting Traditions • Connecting Artisans • Delivering Handmade Excellence
 
 ---
 
-# 🌐 Live Demo
+# 🌐 Live 
 
 <p align="center">
 
