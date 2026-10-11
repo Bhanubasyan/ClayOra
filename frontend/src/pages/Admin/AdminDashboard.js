@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
 import "./Admin.css";
+import AdminFestivalManager from "./AdminFestivalManager";
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -88,6 +89,7 @@ return (
   <div className="admin-container">
 
     <h2 className="admin-title">Admin Dashboard</h2>
+    <AdminFestivalManager />
 
     {/* Interview feature: concise marketplace health cards for users, sellers, approvals, and revenue. */}
     <div className="admin-insights">

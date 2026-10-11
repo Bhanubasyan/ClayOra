@@ -44,7 +44,7 @@ const navigate = useNavigate();
   }
 
   const total = cart.items.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
+    (acc, item) => { const variant = item.variantId ? item.product.variants?.find((entry) => entry._id === item.variantId) : null; return acc + (variant?.price ?? item.product.discountPrice ?? item.product.price) * item.quantity; },
     0
   );
 
@@ -65,7 +65,8 @@ return (
 
             <div className="cart-middle">
               <h4>{item.product.name}</h4>
-              <p className="price">Rs. {item.product.price}</p>
+              {item.variantName && <p>{item.variantName}</p>}
+              <p className="price">Rs. {item.variantId ? item.product.variants?.find((entry) => entry._id === item.variantId)?.price : item.product.discountPrice ?? item.product.price}</p>
 
               {item.product.stock > 0 ? (
                 <p className="stock-info">

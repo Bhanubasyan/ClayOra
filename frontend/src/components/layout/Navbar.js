@@ -64,6 +64,7 @@ function Navbar() {
           >
             Home
           </Link>
+          <Link onClick={() => setMenuOpen(false)} className={location.pathname.startsWith("/festival/") ? "active" : ""} to="/festival/navratri">Navratri</Link>
 
           <Link
             onClick={() => setMenuOpen(false)}

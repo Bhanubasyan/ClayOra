@@ -13,6 +13,7 @@ import OrderSuccess from "./pages/Success/OrderSuccess";
 import Profile from "./pages/Profile/Profile";
 import Wishlist from "./pages/Wishlist/Wishlist";
 import TrackOrder from "./pages/TrackOrder/TrackOrder";
+import FestivalStorefront from "./pages/Festival/FestivalStorefront";
 
 // Admin
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -55,6 +56,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/track-order" element={<TrackOrder />} />
+          <Route path="/festival/:slug" element={<FestivalStorefront />} />
 
           {/* ================= ADMIN ================= */}
           <Route

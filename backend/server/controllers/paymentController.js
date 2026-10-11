@@ -5,6 +5,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
+const { quoteCart, reserveStock } = require("../services/checkout");
 
 const getDeliveryAddress = (deliveryAddress, buyer) => {
   const address = {
@@ -51,18 +52,20 @@ exports.createRazorpayOrder = async (req, res) => {
       return res.status(503).json({ message: "Online payments are not configured. Please choose Cash on Delivery." });
     }
     const deliveryAddress = getDeliveryAddress(req.body.deliveryAddress, req.user);
-    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
-    if (!cart?.items?.length) return res.status(400).json({ message: "Cart is empty" });
-    if (cart.items.some((item) => !item.product || item.quantity > item.product.stock)) {
-      return res.status(400).json({ message: "One or more products are unavailable. Please refresh your cart." });
-    }
-    const totalAmount = cart.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    const quote = await quoteCart(req.user._id, req.body.deliveryLocation || {}, "Razorpay");
+    const { cart } = quote;
     const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
-    const razorpayOrder = await razorpay.orders.create({ amount: Math.round(totalAmount * 100), currency: "INR", receipt: `clayora_${Date.now()}` });
+    const razorpayOrder = await razorpay.orders.create({ amount: Math.round(quote.totalAmount * 100), currency: "INR", receipt: `clayora_${Date.now()}` });
     const order = await Order.create({
       user: req.user._id,
-      orderItems: cart.items.map((item) => ({ product: item.product._id, seller: item.product.seller, quantity: item.quantity, price: item.product.price })),
-      totalAmount,
+      orderItems: cart.items.map((item) => ({ product: item.product._id, seller: item.product.seller._id || item.product.seller, quantity: item.quantity, price: (item.variantId ? item.product.variants.id(item.variantId)?.price : null) ?? item.product.discountPrice ?? item.product.price, variantId: item.variantId, variantName: item.variantName })),
+      totalAmount: quote.totalAmount,
+      subtotal: quote.subtotal,
+      deliveryFee: quote.deliveryFee,
+      discountAmount: quote.discountAmount,
+      deliveryZone: quote.zone?._id,
+      deliveryLocation: quote.coordinates ? { type: "Point", coordinates: [quote.coordinates.longitude, quote.coordinates.latitude] } : undefined,
+      estimatedDeliveryTime: quote.zone?.estimatedDeliveryTime || "",
       deliveryAddress,
       paymentMethod: "Razorpay",
       paymentStatus: "Pending",
@@ -90,11 +93,9 @@ exports.verifyRazorpayPayment = async (req, res) => {
     const order = await Order.findOne({ razorpayOrderId: razorpay_order_id, user: req.user._id });
     if (!order) return res.status(404).json({ message: "Payment order not found" });
     if (order.paymentStatus === "Paid") return res.json({ message: "Payment already verified", orderId: order._id });
-    for (const item of order.orderItems) {
-      const product = await Product.findOneAndUpdate({ _id: item.product, stock: { $gte: item.quantity } }, { $inc: { stock: -item.quantity } });
-      if (!product) return res.status(409).json({ message: "A product just went out of stock. Please contact support for your payment." });
-    }
+    await reserveStock(order.orderItems);
     order.paymentStatus = "Paid";
+    order.inventoryReserved = true;
     order.razorpayPaymentId = razorpay_payment_id;
     order.statusHistory.push({ status: "Pending", note: "Razorpay payment verified" });
     await order.save();
@@ -104,6 +105,6 @@ exports.verifyRazorpayPayment = async (req, res) => {
     notifySellersOfPaidOrder(order).catch((error) => console.error("Seller paid-order notification failed:", error.message));
     res.json({ message: "Payment verified", orderId: order._id });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };

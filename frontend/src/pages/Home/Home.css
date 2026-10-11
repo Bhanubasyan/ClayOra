@@ -403,3 +403,4 @@
   50% { background-color: #f2f2f2; }
   100% { background-color: #e0e0e0; }
 }
+.home-festival-promo{margin:32px max(4vw,16px);min-height:280px;border-radius:22px;padding:44px max(5vw,25px);box-sizing:border-box;display:flex;align-items:center;background:linear-gradient(120deg,#641d0c,#c65a16);background-size:cover;background-position:center;color:white}.home-festival-promo>div{max-width:680px}.home-festival-promo span{font-size:11px;letter-spacing:.2em;color:#f2ca74;font-weight:800}.home-festival-promo h2{font:clamp(32px,5vw,55px) Georgia,serif;margin:10px 0}.home-festival-promo p{line-height:1.6}.home-festival-promo a{display:inline-block;margin-top:12px;background:white;color:#722b0c;text-decoration:none;padding:12px 17px;border-radius:8px;font-weight:800}

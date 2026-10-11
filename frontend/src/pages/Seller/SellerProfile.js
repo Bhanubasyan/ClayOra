@@ -20,16 +20,35 @@ function SellerProfile() {
   const [profile, setProfile] = useState(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [zones, setZones] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [coordinates, setCoordinates] = useState({ latitude: "", longitude: "" });
 
   useEffect(() => {
     API.get("/auth/profile")
       .then(({ data }) => setProfile({ ...emptyProfile, ...data, addressLine1: data.addressLine1 || data.address || "" }))
       .catch(() => alert("Unable to load seller profile"))
       .finally(() => setLoading(false));
+    API.get("/delivery-zones").then(({ data }) => setZones(data)).catch(() => {});
+    API.get("/festivals/seller/catalog").then(({ data }) => setCampaigns(data)).catch(() => {});
   }, []);
 
   const changeField = (event) => {
     setProfile((current) => ({ ...current, [event.target.name]: event.target.value }));
+  };
+
+  const saveLocation = async () => {
+    try { await API.patch("/seller/location", coordinates); alert("Store location saved"); }
+    catch (error) { alert(error.response?.data?.message || "Unable to save store location"); }
+  };
+
+  const requestZone = async (zoneId) => {
+    try { await API.post(`/seller/delivery-zones/${zoneId}/request`); alert("Zone request submitted"); }
+    catch (error) { alert(error.response?.data?.message || "Unable to request zone"); }
+  };
+  const requestCampaign = async (campaignId) => {
+    try { await API.post(`/festivals/${campaignId}/participate`); alert("Campaign participation request submitted"); }
+    catch (error) { alert(error.response?.data?.message || "Unable to request campaign access"); }
   };
 
   const saveProfile = async (event) => {
@@ -116,6 +135,13 @@ function SellerProfile() {
           </button>
         </div>
       </form>
+      <div className="seller-zone-settings">
+        <h3>Local delivery coverage</h3>
+        <p>Set the store's map coordinates, then request access to a Clayora delivery zone. An administrator must approve it before your products are deliverable.</p>
+        <div className="seller-coordinate-row"><input type="number" step="any" placeholder="Store latitude" value={coordinates.latitude} onChange={(e) => setCoordinates({ ...coordinates, latitude: e.target.value })}/><input type="number" step="any" placeholder="Store longitude" value={coordinates.longitude} onChange={(e) => setCoordinates({ ...coordinates, longitude: e.target.value })}/><button type="button" className="primary-btn" onClick={saveLocation}>Save map pin</button></div>
+        <div className="seller-zone-list">{zones.map((zone) => <div key={zone._id}><span><strong>{zone.name}</strong><small>{zone.city} · {zone.radiusKm} km</small></span><button type="button" onClick={() => requestZone(zone._id)}>Request access</button></div>)}</div>
+        <h3>Festival campaigns</h3><div className="seller-zone-list">{campaigns.map((campaign) => <div key={campaign._id}><span><strong>{campaign.name}</strong><small>{new Date(campaign.endDate).toLocaleDateString("en-IN")} end date</small></span><button type="button" onClick={() => requestCampaign(campaign._id)}>Request participation</button></div>)}</div>
+      </div>
     </section>
   );
 }

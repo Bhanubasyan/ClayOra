@@ -80,6 +80,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    storeLocation: {
+      type: { type: String, enum: ["Point"], default: "Point" },
+      coordinates: { type: [Number], default: undefined },
+    },
+    requestedDeliveryZones: [{ type: mongoose.Schema.Types.ObjectId, ref: "DeliveryZone" }],
+    approvedDeliveryZones: [{ type: mongoose.Schema.Types.ObjectId, ref: "DeliveryZone" }],
+    festivalParticipation: [{
+      campaign: { type: mongoose.Schema.Types.ObjectId, ref: "FestivalCampaign", required: true },
+      status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+      requestedAt: { type: Date, default: Date.now },
+    }],
     isEmailVerified: {
       type: Boolean,
       default: false,
@@ -94,6 +105,8 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ storeLocation: "2dsphere" }, { sparse: true });
 
 // Hash password before saving
 userSchema.pre("save", async function () {

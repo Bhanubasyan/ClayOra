@@ -52,9 +52,14 @@ const tag = new URLSearchParams(location.search).get("tag");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [wishlistIds, setWishlistIds] = useState([]);
+  const [festivalCampaigns, setFestivalCampaigns] = useState([]);
 
   const navigate = useNavigate();
   const productRef = useRef([]);
+
+  useEffect(() => {
+    API.get("/festivals/active").then(({ data }) => setFestivalCampaigns(data)).catch(() => {});
+  }, []);
 
   /* ================= HERO SLIDER ================= */
   useEffect(() => {
@@ -237,6 +242,8 @@ const categories = [
           </button>
         </div>
       </section>
+
+      {festivalCampaigns.map((festivalCampaign) => <section key={festivalCampaign._id} className="home-festival-promo" style={festivalCampaign.heroBanner ? { backgroundImage: `linear-gradient(90deg,rgba(83,27,6,.92),rgba(137,55,8,.52)),url(${festivalCampaign.heroBanner})` } : undefined}><div><span>{festivalCampaign.locationBased ? `LOCATION SALE · ${festivalCampaign.targetZones.map((zone) => zone.city || zone.name).join(", ")}` : "ALL LOCATIONS · SEASONAL SALE"}</span><h2>{festivalCampaign.heroTitle || festivalCampaign.name}</h2><p>{festivalCampaign.description}</p><Link to={`/festival/${festivalCampaign.slug}`}>Explore this sale</Link></div></section>)}
 
 
 {/* ================= Cateogory section ================= */}

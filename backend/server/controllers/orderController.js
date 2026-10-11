@@ -4,6 +4,7 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
 const mongoose = require("mongoose");
+const { quoteCart, reserveStock } = require("../services/checkout");
 
 const escapeHtml = (value) => String(value || "")
   .replace(/&/g, "&amp;")
@@ -85,58 +86,41 @@ const notifySellersOfOrder = async (order) => {
 // @route POST /api/orders
 // @access Private
 exports.createOrder = async (req, res) => {
+  let reservedItems = [];
   try {
     const deliveryAddress = getDeliveryAddress(req.body.deliveryAddress, req.user);
-    const cart = await Cart.findOne({ user: req.user._id })
-      .populate("items.product");
-
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
-    }
-
-    let totalAmount = 0;
-    const orderItems = [];
-
-    for (let item of cart.items) {
-
-      // Stock validation
-      if (item.quantity > item.product.stock) {
-        return res.status(400).json({
-          message: `Only ${item.product.stock} items available for "${item.product.name}".`
-        });
-      }
-
-      totalAmount += item.quantity * item.product.price;
-
-      orderItems.push({
+    const quote = await quoteCart(req.user._id, req.body.deliveryLocation || {}, "COD");
+    const { cart } = quote;
+    const orderItems = cart.items.map((item) => ({
         product: item.product._id,
         quantity: item.quantity,
-        price: item.product.price,
+        price: (item.variantId ? item.product.variants.id(item.variantId)?.price : null) ?? item.product.discountPrice ?? item.product.price,
+        variantId: item.variantId,
+        variantName: item.variantName,
         seller: extractSellerObjectId(item.product.seller),
-      });
-    }
+      }));
+    await reserveStock(cart.items);
+    reservedItems = cart.items.map((item) => ({ product: item.product._id, variantId: item.variantId, quantity: item.quantity }));
 
     // Create order
     const order = await Order.create({
       user: req.user._id,
       orderItems,
-      totalAmount,
+      totalAmount: quote.totalAmount,
+      subtotal: quote.subtotal,
+      deliveryFee: quote.deliveryFee,
+      discountAmount: quote.discountAmount,
+      deliveryZone: quote.zone?._id,
+      deliveryLocation: quote.coordinates ? { type: "Point", coordinates: [quote.coordinates.longitude, quote.coordinates.latitude] } : undefined,
+      estimatedDeliveryTime: quote.zone?.estimatedDeliveryTime || "",
       deliveryAddress,
       // Interview feature: COD remains the safe existing default while payment metadata is now persisted.
       paymentMethod: req.body.paymentMethod === "Razorpay" ? "Razorpay" : "COD",
       paymentStatus: req.body.paymentMethod === "Razorpay" ? "Pending" : "Pending",
+      inventoryReserved: true,
       statusHistory: [{ status: "Pending", note: "Order placed" }],
     });
-
-    // Reduce stock after order success
-// Reduce stock after order success
-for (let item of cart.items) {
-  await Product.findByIdAndUpdate(
-    item.product._id,
-    { $inc: { stock: -item.quantity } },
-    { new: true }
-  );
-}
+    reservedItems = [];
 
     // Clear cart
     cart.items = [];
@@ -151,8 +135,9 @@ for (let item of cart.items) {
     res.status(201).json(order);
 
   } catch (error) {
+    if (reservedItems.length) await Promise.all(reservedItems.map((item) => item.variantId ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { stock: item.quantity, "variants.$.stock": item.quantity } }) : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } }))).catch(() => {});
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -313,6 +298,11 @@ exports.cancelOrder = async (req, res) => {
     // Interview feature: a cancellation is also represented in the immutable status history.
     order.statusHistory.push({ status: "Cancelled", note: "Cancelled by customer" });
     await order.save();
+    if (order.inventoryReserved) {
+      await Promise.all(order.orderItems.map((item) => item.variantId ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { stock: item.quantity, "variants.$.stock": item.quantity } }) : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } })));
+      order.inventoryReserved = false;
+      await order.save();
+    }
 
     res.status(200).json({
       message: "Order cancelled successfully",

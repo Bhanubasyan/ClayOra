@@ -26,6 +26,61 @@ Crafting Traditions • Connecting Artisans • Delivering Handmade Excellence
 
 </p>
 
+## Hyperlocal festival marketplace
+
+Clayora now supports admin-configured geographic delivery zones and reusable seasonal campaigns. The first supported storefront route is `/festival/navratri`; its banner, dates, zones, categories, products, sellers, and offers come from MongoDB and disappear automatically when the campaign is inactive or outside its date window.
+
+Every campaign is a central sale record. Administrators can keep a sale available everywhere or enable **location-based sale** and assign any number of delivery zones. This supports combinations such as Navratri in Delhi/Noida and Diwali in Dehradun without creating new source-code pages. Location selection and zone validation are mandatory only for campaigns configured as location-based.
+
+### Local launch workflow
+
+1. Start MongoDB and the existing backend/frontend applications.
+2. Sign in as an administrator and open **Festival Campaign Management** on `/admin`.
+3. Create `Clayora Noida Zone 1` with the administrator-approved center coordinates, radius, fee, minimum order, ETA, and COD policy. The center is never hardcoded.
+4. Create or activate `Sharad Navratri 2026` (October 11–20, 2026, `Asia/Kolkata`) and select the zone.
+5. Sellers save their store map pin and request zone and campaign access from Seller Profile.
+6. The administrator approves both requests.
+7. Sellers add real products, ingredients, declared vrat suitability, stock, festival category, applicable zone, and optional seasonal price. Existing product approval still applies.
+8. Customers select a GPS/map-pin location. The server rechecks the zone, seller coverage, stock, totals, payment policy, and minimum order at checkout.
+
+The MVP intentionally keeps one seller per order. Adding an item from another seller returns a clear error and does not replace the cart.
+
+### Optional development-only seed
+
+The seed creates only an **inactive** zone and campaign/category configuration. It never creates sellers, products, prices, reviews, customers, or orders. Coordinates must be supplied explicitly:
+
+```env
+DEMO_SEED=true
+DEMO_ZONE_LATITUDE=your_admin_approved_latitude
+DEMO_ZONE_LONGITUDE=your_admin_approved_longitude
+```
+
+```bash
+cd backend/server
+npm run seed:festival-demo
+```
+
+### Added API surface
+
+- `GET /api/delivery-zones`, `POST /api/delivery-zones/check`, `POST /api/delivery-zones/notify`
+- Admin-protected `POST /api/delivery-zones`, `PATCH /api/delivery-zones/:id`
+- `GET /api/festivals/active`, `GET /api/festivals/:slug`
+- Admin campaign CRUD/analytics and seller participation review under `/api/festivals/admin`
+- Seller store pin and zone requests under `/api/seller`
+- Existing `GET /api/products` accepts `festival`, `festivalCategory`, and `zoneId`
+
+### Verification
+
+```bash
+cd backend/server
+npm test
+
+cd ../../../frontend
+npm run build
+```
+
+The backend tests cover coordinate validation and a 3 km boundary calculation. Checkout also uses conditional atomic stock deductions with rollback of partial reservations; cancellation restores inventory only when that order actually reserved it.
+
 ---
 
 # 🌐 Live 

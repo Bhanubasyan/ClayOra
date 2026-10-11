@@ -7,12 +7,13 @@ function ProductDetails() {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [variantId, setVariantId] = useState("");
   const [review, setReview] = useState({ rating: 5, comment: "" });
   const [wishlistSaved, setWishlistSaved] = useState(false);
 
   const fetchProduct = useCallback(() => {
     API.get(`/products/${id}`)
-      .then((res) => setProduct(res.data))
+      .then((res) => { setProduct(res.data); setVariantId(res.data.variants?.[0]?._id || ""); })
       .catch((err) => console.log(err));
   }, [id]);
 
@@ -30,6 +31,7 @@ function ProductDetails() {
       await API.post("/cart", {
         productId: product._id,
         quantity,
+        variantId: variantId || undefined,
       });
 
       alert("Added to Cart!");
@@ -74,6 +76,7 @@ function ProductDetails() {
   };
 
   if (!product) return <h2>Loading...</h2>;
+  const selectedVariant = product.variants?.find((item) => item._id === variantId);
 
   // Interview feature: a familiar rating breakdown helps customers judge product quality at a glance.
   const ratingBreakdown = [5, 4, 3, 2, 1].map((rating) => ({
@@ -94,12 +97,15 @@ function ProductDetails() {
       <div className="product-info">
         <h2 className="product-title">{product.name}</h2>
 
-        <p className="price">Rs. {product.price}</p>
+        <p className="price">Rs. {selectedVariant?.price ?? product.discountPrice ?? product.price}</p>
         <p className="product-rating">
           ★ {Number(product.rating || 0).toFixed(1)} from {product.numReviews || 0} reviews
         </p>
 
         <p className="desc">{product.description}</p>
+        {product.variants?.length > 0 && <label className="variant-picker">Choose option<select value={variantId} onChange={(e) => { setVariantId(e.target.value); setQuantity(1); }}>{product.variants.map((variant) => <option key={variant._id} value={variant._id}>{variant.name} — Rs. {variant.price} ({variant.stock} available)</option>)}</select></label>}
+        {product.vratFriendly && <p className="vrat-note"><strong>Seller-declared vrat friendly.</strong> Fasting practices vary; verify the listed ingredients for your tradition.</p>}
+        {product.ingredients?.length > 0 && <p><strong>Ingredients:</strong> {product.ingredients.join(", ")}</p>}
 
         {/* Quantity */}
         <div className="quantity-control">
@@ -120,7 +126,7 @@ function ProductDetails() {
         <button
           className="add-btn"
           onClick={addToCart}
-          disabled={product.stock === 0}
+          disabled={(selectedVariant ? selectedVariant.stock : product.stock) === 0}
         >
           Add to Cart
         </button>

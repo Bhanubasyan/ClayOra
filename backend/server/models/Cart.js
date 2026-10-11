@@ -20,6 +20,8 @@ const cartSchema = new mongoose.Schema(
           required: true,
           default: 1,
         },
+        variantId: { type: mongoose.Schema.Types.ObjectId },
+        variantName: { type: String, default: "", trim: true },
       },
     ],
   },

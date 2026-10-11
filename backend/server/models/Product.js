@@ -15,11 +15,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    category: {
-      type: String,
-      enum: ["Pottery", "Wood"],
-      required: true,
-    },
+    category: { type: String, required: true, trim: true },
     tags: [
   {
     type: String,
@@ -32,6 +28,24 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
+    festivalTags: [{ type: String, lowercase: true, trim: true }],
+    festivalCategory: { type: String, default: "", trim: true },
+    vratFriendly: { type: Boolean, default: false },
+    ingredients: [{ type: String, trim: true }],
+    brand: { type: String, default: "", trim: true },
+    quantity: { type: Number, min: 0 },
+    unit: { type: String, default: "", trim: true },
+    variants: [{
+      name: { type: String, required: true, trim: true },
+      price: { type: Number, required: true, min: 0 },
+      stock: { type: Number, required: true, min: 0 },
+      sku: { type: String, default: "", trim: true },
+    }],
+    availability: { type: String, enum: ["available", "unavailable"], default: "available" },
+    applicableDeliveryZones: [{ type: mongoose.Schema.Types.ObjectId, ref: "DeliveryZone" }],
+    discountPrice: { type: Number, min: 0 },
+    expiryDate: Date,
+    isFestivalCombo: { type: Boolean, default: false },
     image: {
       type: String,
       required: true,
@@ -60,5 +74,7 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+productSchema.index({ festivalTags: 1, festivalCategory: 1, applicableDeliveryZones: 1, isApproved: 1 });
 
 module.exports = mongoose.model("Product", productSchema);

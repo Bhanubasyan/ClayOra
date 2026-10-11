@@ -1,5 +1,29 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const User = require("../models/User");
+const FestivalCampaign = require("../models/FestivalCampaign");
+
+const parseArray = (value, fallback = []) => {
+  if (Array.isArray(value)) return value;
+  if (!value) return fallback;
+  try { return JSON.parse(value); } catch { return String(value).split(",").map((item) => item.trim()).filter(Boolean); }
+};
+
+const festivalFields = (body) => ({
+  festivalTags: parseArray(body.festivalTags).map((tag) => String(tag).toLowerCase()),
+  festivalCategory: String(body.festivalCategory || "").trim(),
+  vratFriendly: body.vratFriendly === true || body.vratFriendly === "true",
+  ingredients: parseArray(body.ingredients),
+  brand: String(body.brand || "").trim(),
+  quantity: body.quantity === "" || body.quantity === undefined ? undefined : Number(body.quantity),
+  unit: String(body.unit || "").trim(),
+  variants: parseArray(body.variants),
+  availability: body.availability === "unavailable" ? "unavailable" : "available",
+  applicableDeliveryZones: parseArray(body.applicableDeliveryZones),
+  discountPrice: body.discountPrice === "" || body.discountPrice === undefined ? undefined : Number(body.discountPrice),
+  expiryDate: body.expiryDate || undefined,
+  isFestivalCombo: body.isFestivalCombo === true || body.isFestivalCombo === "true",
+});
 
 // @desc    Create Product
 // @route   POST /api/products
@@ -25,6 +49,13 @@ exports.createProduct = async (req, res) => {
     if (!name || !description || !price || !category || !stock || !productImage) {
       return res.status(400).json({ message: "All fields including image are required" });
     }
+    const requestedFestivals = festivalFields(req.body).festivalTags;
+    if (req.user.role === "seller" && requestedFestivals.length) {
+      const campaignIds = await FestivalCampaign.find({ slug: { $in: requestedFestivals } }).distinct("_id");
+      if (campaignIds.length !== requestedFestivals.length) return res.status(400).json({ message: "One or more selected sales do not exist." });
+      const approvedIds = req.user.festivalParticipation.filter((item) => item.status === "approved").map((item) => String(item.campaign));
+      if (campaignIds.some((id) => !approvedIds.includes(String(id)))) return res.status(403).json({ message: "Admin approval is required before listing products in this festival campaign." });
+    }
 
     const product = await Product.create({
       name,
@@ -36,6 +67,7 @@ exports.createProduct = async (req, res) => {
       image: productImage,
       seller: req.user._id,
       isApproved: false,
+      ...festivalFields(req.body),
     });
 
     res.status(201).json(product);
@@ -58,6 +90,9 @@ exports.getProducts = async (req, res) => {
       maxPrice,
       minRating,
       availability,
+      festival,
+      festivalCategory,
+      zoneId,
       sort = "newest",
       page = 1,
       limit = 10,
@@ -93,6 +128,12 @@ if (tag) {
     // Interview feature: supports rating and stock filters from the customer catalogue.
     if (minRating) query.rating = { $gte: Number(minRating) };
     if (availability === "in-stock") query.stock = { $gt: 0 };
+    if (festival) query.festivalTags = String(festival).toLowerCase();
+    if (festivalCategory) query.festivalCategory = festivalCategory;
+    if (zoneId) {
+      query.applicableDeliveryZones = zoneId;
+      query.seller = { $in: await User.find({ role: "seller", approvedDeliveryZones: zoneId }).distinct("_id") };
+    }
 
     // Interview feature: allowlisted sorting prevents arbitrary client-provided database sorting.
     const sortOptions = {
@@ -107,6 +148,7 @@ if (tag) {
 
 
  const products = await Product.find(query)
+   .populate("seller", "name businessName approvedDeliveryZones")
    .sort(sortOptions[sort] || sortOptions.newest)
    .limit(Number(limit))
     .skip((Number(page) - 1) * Number(limit));
@@ -235,12 +277,10 @@ exports.updateProduct = async (req, res) => {
     }
 
     // Update fields
-    product.name = req.body.name || product.name;
-    product.description = req.body.description || product.description;
-    product.price = req.body.price || product.price;
-    product.category = req.body.category || product.category;
-    product.stock = req.body.stock || product.stock;
-    product.image = req.body.image || product.image;
+    ["name", "description", "price", "category", "stock", "image"].forEach((field) => {
+      if (req.body[field] !== undefined) product[field] = req.body[field];
+    });
+    Object.assign(product, festivalFields({ ...product.toObject(), ...req.body }));
 
     const updatedProduct = await product.save();
 

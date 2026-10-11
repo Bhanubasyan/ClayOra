@@ -16,6 +16,7 @@ const profileFields = [
   "postalCode",
   "country",
   "businessName",
+  "storeLocation",
 ];
 
 const requiredProfileFields = [
@@ -44,6 +45,9 @@ const buildUserResponse = (user, token) => {
     postalCode: user.postalCode || "",
     country: user.country || "India",
     businessName: user.businessName || "",
+    storeLocation: user.storeLocation,
+    requestedDeliveryZones: user.requestedDeliveryZones || [],
+    approvedDeliveryZones: user.approvedDeliveryZones || [],
     isEmailVerified: user.isEmailVerified,
   };
 

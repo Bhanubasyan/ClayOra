@@ -26,12 +26,23 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        variantId: { type: mongoose.Schema.Types.ObjectId },
+        variantName: { type: String, default: "", trim: true },
       },
     ],
     totalAmount: {
       type: Number,
       required: true,
     },
+    subtotal: { type: Number, min: 0 },
+    deliveryFee: { type: Number, default: 0, min: 0 },
+    discountAmount: { type: Number, default: 0, min: 0 },
+    deliveryZone: { type: mongoose.Schema.Types.ObjectId, ref: "DeliveryZone" },
+    deliveryLocation: {
+      type: { type: String, enum: ["Point"], default: "Point" },
+      coordinates: { type: [Number], default: undefined },
+    },
+    estimatedDeliveryTime: { type: String, default: "" },
     deliveryAddress: {
       recipientName: { type: String, required: true, trim: true },
       phone: { type: String, required: true, trim: true },
@@ -52,6 +63,7 @@ const orderSchema = new mongoose.Schema(
     // Interview feature: records the customer-selected payment method and its verified outcome.
     paymentMethod: { type: String, enum: ["COD", "Razorpay"], default: "COD" },
     paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
+    inventoryReserved: { type: Boolean, default: false },
     razorpayOrderId: { type: String, default: "" },
     razorpayPaymentId: { type: String, default: "" },
     // Interview feature: preserves a readable audit trail for the customer order timeline.
@@ -65,5 +77,7 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+orderSchema.index({ deliveryZone: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Order", orderSchema);

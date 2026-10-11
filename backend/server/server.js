@@ -51,6 +51,8 @@ app.use("/api/seller", require("./routes/sellerRoutes"));
 app.use("/api/payments", require("./routes/paymentRoutes"));
 // Wishlist feature: mounts the authenticated saved-products API used by the customer pages.
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
+app.use("/api/delivery-zones", require("./routes/deliveryZoneRoutes"));
+app.use("/api/festivals", require("./routes/festivalRoutes"));
 
 /* ================================
    HEALTH CHECK
@@ -66,7 +68,8 @@ app.get("/", (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.message);
-  res.status(500).json({
+  const status = err.statusCode || (err.name === "ValidationError" ? 400 : 500);
+  res.status(status).json({
     message: err.message || "Internal Server Error",
   });
 });
