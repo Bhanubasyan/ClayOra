@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import API from "../../services/api";
 import "./Admin.css";
-import AdminFestivalManager from "./AdminFestivalManager";
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -89,7 +89,15 @@ return (
   <div className="admin-container">
 
     <h2 className="admin-title">Admin Dashboard</h2>
-    <AdminFestivalManager />
+    <section className="admin-feature-card">
+      <div className="admin-feature-icon" aria-hidden="true">✦</div>
+      <div>
+        <span>SEASONAL COMMERCE</span>
+        <h3>Festival Sales & Delivery Areas</h3>
+        <p>Create Navratri, Diwali and future sales, choose whether location is required, assign cities and manage seller participation.</p>
+      </div>
+      <Link className="admin-feature-link" to="/admin/festival-campaigns">Manage festival sales <span>→</span></Link>
+    </section>
 
     {/* Interview feature: concise marketplace health cards for users, sellers, approvals, and revenue. */}
     <div className="admin-insights">

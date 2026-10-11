@@ -17,6 +17,7 @@ import FestivalStorefront from "./pages/Festival/FestivalStorefront";
 
 // Admin
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import FestivalCampaignPage from "./pages/Admin/FestivalCampaignPage";
 
 // Seller
 import SellerDashboard from "./pages/Seller/SellerDashboard";
@@ -64,6 +65,14 @@ function App() {
             element={
               <AdminRoute>
                 <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/festival-campaigns"
+            element={
+              <AdminRoute>
+                <FestivalCampaignPage />
               </AdminRoute>
             }
           />
