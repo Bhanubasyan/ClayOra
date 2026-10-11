@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import API from "../../services/api";
-import { animateToCart } from "../../components/animation/cartMotion";
 import "./Home.css";
 
 import image2 from "../../assets/hero/image2.jpg";
@@ -181,13 +180,13 @@ const categories = [
     fetchProducts(search, category, nextFilters);
   };
 
-  const addToCart = async (productId, source) => {
+  const addToCart = async (productId) => {
     try {
       await API.post("/cart", {
         productId,
         quantity: 1,
       });
-      animateToCart(source);
+      alert("Added to Cart!");
     } catch (error) {
       // Wishlist feature: distinguish a real expired-login response from an API or server error.
       if (error.response?.status === 401) {
@@ -228,13 +227,11 @@ const categories = [
         ))}
 
         <div className="overlay"></div>
-        <div className="hero-aurora hero-aurora-one"></div><div className="hero-aurora hero-aurora-two"></div>
 
         <div className="hero-content">
           <h1>Crafted from Earth, Made for You</h1>
           <p>Discover timeless handmade pottery by Clayora artisans.</p>
           <button
-            className="premium-button"
             onClick={() =>
               productsSectionRef.current?.scrollIntoView({
       behavior: "smooth"
@@ -243,11 +240,6 @@ const categories = [
           >
             Explore Collection
           </button>
-        </div>
-        <div className="hero-visual-stack" aria-hidden="true">
-          <div className="hero-product-panel panel-one"><img src={heroImages[(current + 1) % heroImages.length]} alt="" /></div>
-          <div className="hero-product-panel panel-two"><img src={heroImages[(current + 2) % heroImages.length]} alt="" /></div>
-          <div className="hero-glass-chip"><span>✦</span><strong>Made by artisans</strong><small>One piece at a time</small></div>
         </div>
       </section>
 
@@ -368,7 +360,7 @@ const categories = [
                     ★ {Number(product.rating || 0).toFixed(1)} ({product.numReviews || 0})
                   </p>
 
-                  <button className="premium-button" onClick={(event) => addToCart(product._id, event.currentTarget)}>
+                  <button onClick={() => addToCart(product._id)}>
                     Add to Cart
                   </button>
                 </div>

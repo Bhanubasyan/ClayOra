@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../../services/api";
-import { animateToCart } from "../../components/animation/cartMotion";
 import "./ProductDetails.css";
 function ProductDetails() {
   const { id } = useParams();
@@ -27,7 +26,7 @@ function ProductDetails() {
       .catch(() => setWishlistSaved(false));
   }, [id, fetchProduct]);
 
-  const addToCart = async (event) => {
+  const addToCart = async () => {
     try {
       await API.post("/cart", {
         productId: product._id,
@@ -35,7 +34,8 @@ function ProductDetails() {
         variantId: variantId || undefined,
       });
 
-      animateToCart(event.currentTarget);
+      alert("Added to Cart!");
+      navigate("/cart");
     } catch (error) {
       // Wishlist feature: retain login guidance only for a true unauthorized response.
       if (error.response?.status === 401) {

@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import logo from "../../assets/images/logo.png";
-import API from "../../services/api";
 import "./Navbar.css";
 
 function Navbar() {
@@ -10,8 +9,6 @@ function Navbar() {
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [cartBump, setCartBump] = useState(false);
 
   // Read user from local storage
   useEffect(() => {
@@ -20,19 +17,6 @@ function Navbar() {
       setUser(JSON.parse(storedUser));
     }
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (!user) return undefined;
-    API.get("/cart").then(({ data }) => setCartCount(data?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0)).catch(() => {});
-    const added = () => {
-      setCartCount((count) => count + 1);
-      setCartBump(false);
-      requestAnimationFrame(() => setCartBump(true));
-      setTimeout(() => setCartBump(false), 550);
-    };
-    window.addEventListener("clayora:cart-added", added);
-    return () => window.removeEventListener("clayora:cart-added", added);
-  }, [user, location.pathname]);
 
   /* ===== Scroll Effect ===== */
   useEffect(() => {
@@ -86,9 +70,8 @@ function Navbar() {
             onClick={() => setMenuOpen(false)}
             className={location.pathname === "/cart" ? "active" : ""}
             to="/cart"
-            data-cart-link
           >
-            Cart <span className={`nav-cart-count ${cartBump ? "bump" : ""}`}>{cartCount}</span>
+            Cart
           </Link>
 
           {user && (

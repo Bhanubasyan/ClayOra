@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../../services/api";
 import "./Admin.css";
-import Reveal from "../../components/animation/Reveal";
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -90,7 +89,7 @@ return (
   <div className="admin-container">
 
     <h2 className="admin-title">Admin Dashboard</h2>
-    <Reveal as="section" className="admin-feature-card">
+    <section className="admin-feature-card">
       <div className="admin-feature-icon" aria-hidden="true">✦</div>
       <div>
         <span>SEASONAL COMMERCE</span>
@@ -98,7 +97,7 @@ return (
         <p>Create Navratri, Diwali and future sales, choose whether location is required, assign cities and manage seller participation.</p>
       </div>
       <Link className="admin-feature-link" to="/admin/festival-campaigns">Manage festival sales <span>→</span></Link>
-    </Reveal>
+    </section>
 
     {/* Interview feature: concise marketplace health cards for users, sellers, approvals, and revenue. */}
     <div className="admin-insights">

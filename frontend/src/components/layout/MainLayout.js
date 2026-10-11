@@ -1,14 +1,12 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Outlet, useLocation } from "react-router-dom";
-import "../animation/motion.css";
+import { Outlet } from "react-router-dom";
 
 function MainLayout() {
-  const location = useLocation();
   return (
     <>
       <Navbar />
-      <main key={location.pathname} className="motion-page"><Outlet /></main>
+      <Outlet />
       <Footer />
     </>
   );
