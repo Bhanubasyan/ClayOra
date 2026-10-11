@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import API from "../../services/api";
 import DeliveryLocationSelector, { getSavedDeliveryLocation } from "../../components/delivery/DeliveryLocationSelector";
+import { animateToCart } from "../../components/animation/cartMotion";
 import "./FestivalStorefront.css";
 
 function FestivalProductCard({ product, addToCart }) {
@@ -13,7 +14,7 @@ function FestivalProductCard({ product, addToCart }) {
       <Link to={`/product/${product._id}`}><h3>{product.name}</h3></Link>
       <p className="festival-seller">{product.seller?.businessName || product.seller?.name || "Local seller"}</p>
       {product.vratFriendly && <span className="vrat-badge">Seller-declared vrat friendly</span>}
-      <div className="festival-product-bottom"><strong>₹{product.variants?.[0]?.price ?? price}</strong>{product.discountPrice != null && <del>₹{product.price}</del>}<button onClick={() => addToCart(product._id, product.variants?.[0]?._id)}>Add</button></div>
+      <div className="festival-product-bottom"><strong>₹{product.variants?.[0]?.price ?? price}</strong>{product.discountPrice != null && <del>₹{product.price}</del>}<button onClick={(event) => addToCart(product._id, product.variants?.[0]?._id, event.currentTarget)}>Add</button></div>
     </div>
   </article>;
 }
@@ -55,8 +56,8 @@ function FestivalStorefront() {
     combo: products.filter((product) => product.isFestivalCombo || campaign?.categories.find((c) => c.slug === product.festivalCategory)?.group === "combo"),
   }), [products, campaign]);
 
-  const addToCart = async (productId, variantId) => {
-    try { await API.post("/cart", { productId, quantity: 1, variantId }); alert("Added to cart"); }
+  const addToCart = async (productId, variantId, source) => {
+    try { await API.post("/cart", { productId, quantity: 1, variantId }); animateToCart(source); }
     catch (requestError) { alert(requestError.response?.data?.message || "Please log in to add this product"); }
   };
 
