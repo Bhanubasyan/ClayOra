@@ -11,6 +11,8 @@ import image5 from "../../assets/hero/image5.jpg";
 import image7 from "../../assets/hero/image7.jpg";
 import image8 from "../../assets/hero/image8.jpg";
 import image10 from "../../assets/hero/image10.jpg";
+import earthEmberBanner from "../../assets/banners/clayora-earth-ember.png";
+import festiveGiftingBanner from "../../assets/banners/clayora-festive-gifting.png";
 
 import {
   FaHome,
@@ -243,6 +245,14 @@ const categories = [
         </div>
       </section>
 
+      <section className="clayora-promises" aria-label="ClayOra shopping benefits">
+        <div className="promise-item"><span className="promise-icon" aria-hidden="true">&#10022;</span><span><strong>Artisan made</strong><small>Every piece has a maker</small></span></div>
+        <div className="promise-divider" aria-hidden="true"></div>
+        <div className="promise-item"><span className="promise-icon" aria-hidden="true">&#9671;</span><span><strong>Thoughtfully curated</strong><small>Quality you can feel</small></span></div>
+        <div className="promise-divider" aria-hidden="true"></div>
+        <div className="promise-item"><span className="promise-icon" aria-hidden="true">&#10227;</span><span><strong>Secure delivery</strong><small>Packed carefully, sent safely</small></span></div>
+      </section>
+
       {festivalCampaigns.map((festivalCampaign) => <section key={festivalCampaign._id} className="home-festival-promo" style={festivalCampaign.heroBanner ? { backgroundImage: `linear-gradient(90deg,rgba(83,27,6,.92),rgba(137,55,8,.52)),url(${festivalCampaign.heroBanner})` } : undefined}><div><span>{festivalCampaign.locationBased ? `LOCATION SALE · ${festivalCampaign.targetZones.map((zone) => zone.city || zone.name).join(", ")}` : "ALL LOCATIONS · SEASONAL SALE"}</span><h2>{festivalCampaign.heroTitle || festivalCampaign.name}</h2><p>{festivalCampaign.description}</p><Link to={`/festival/${festivalCampaign.slug}`}>Explore this sale</Link></div></section>)}
 
 
@@ -268,8 +278,46 @@ const categories = [
 </div>
 
 
+      {/* ================= EDITORIAL COLLECTION BANNERS ================= */}
+      <section className="editorial-banners" aria-label="Featured ClayOra collections">
+        <article
+          className="editorial-banner editorial-banner-earth"
+          style={{ backgroundImage: `url(${earthEmberBanner})` }}
+        >
+          <div className="editorial-copy">
+            <span className="editorial-kicker">The artisan edit</span>
+            <h2>Earth &amp; Ember</h2>
+            <p>Hand-finished forms, natural textures and objects made slowly for soulful spaces.</p>
+            <Link to="/home?tag=Pottery">Explore pottery <span aria-hidden="true">&#8594;</span></Link>
+          </div>
+          <span className="editorial-orbit editorial-orbit-one" aria-hidden="true"></span>
+          <span className="editorial-orbit editorial-orbit-two" aria-hidden="true"></span>
+        </article>
+
+        <article
+          className="editorial-banner editorial-banner-festive"
+          style={{ backgroundImage: `url(${festiveGiftingBanner})` }}
+        >
+          <div className="editorial-copy">
+            <span className="editorial-kicker">Celebrate beautifully</span>
+            <h2>Gifts with a story</h2>
+            <p>Thoughtful keepsakes, festive warmth and handcrafted details for every celebration.</p>
+            <Link to="/home?tag=Gifts">Shop festive gifts <span aria-hidden="true">&#8594;</span></Link>
+          </div>
+          <span className="editorial-spark editorial-spark-one" aria-hidden="true"></span>
+          <span className="editorial-spark editorial-spark-two" aria-hidden="true"></span>
+          <span className="editorial-spark editorial-spark-three" aria-hidden="true"></span>
+        </article>
+      </section>
+
+
       {/* ================= MAIN CONTENT ================= */}
      <div className="home-container" ref={productsSectionRef}>
+
+        <header className="collection-heading">
+          <div><span>Curated for your home</span><h2>Objects with soul</h2></div>
+          <p>Discover pieces shaped by skilled hands, honest materials and generations of craft.</p>
+        </header>
 
         {/* SEARCH + FILTER */}
         <div className="filter-section">
@@ -368,6 +416,18 @@ const categories = [
           )}
         </div>
       </div>
+
+      <section className="craft-story" aria-label="Our craft story">
+        <div className="craft-story-pattern" aria-hidden="true">
+          <span className="craft-ring craft-ring-one"></span><span className="craft-ring craft-ring-two"></span><span className="craft-vessel">&#9813;</span>
+        </div>
+        <div className="craft-story-copy">
+          <span className="craft-eyebrow">Made by human hands</span>
+          <h2>From raw earth<br />to a lasting story.</h2>
+          <p>ClayOra celebrates the beautiful irregularities of handmade work—the maker's touch, the natural grain and the small details that make no two pieces exactly alike.</p>
+          <div className="craft-numbers"><span><strong>100%</strong><small>handpicked</small></span><span><strong>Local</strong><small>craft stories</small></span><span><strong>Slow</strong><small>made with care</small></span></div>
+        </div>
+      </section>
     </>
   );
 }
