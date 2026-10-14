@@ -81,7 +81,7 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     storeLocation: {
-      type: { type: String, enum: ["Point"], default: "Point" },
+      type: { type: String, enum: ["Point"] },
       coordinates: { type: [Number], default: undefined },
     },
     requestedDeliveryZones: [{ type: mongoose.Schema.Types.ObjectId, ref: "DeliveryZone" }],

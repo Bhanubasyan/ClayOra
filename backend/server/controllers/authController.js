@@ -188,6 +188,12 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
+    // Older users may have an incomplete GeoJSON value (`{ type: "Point" }`).
+    // Remove it before saving the reset token so the 2dsphere index accepts the update.
+    if (!Array.isArray(user.storeLocation?.coordinates) || user.storeLocation.coordinates.length !== 2) {
+      user.set("storeLocation", undefined);
+    }
+
     // check token by console 
     console.log("RAW RESET TOKEN: ", resetToken);
     console.log("Hased token : " , hashedToken);
