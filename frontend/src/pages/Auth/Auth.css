@@ -131,3 +131,15 @@ form button:hover {
 .switch-text:hover {
   text-decoration: underline;
 }
+
+.forgot-message {
+  margin: -28px 0;
+  color: #654437;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.flip-card-upward form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}

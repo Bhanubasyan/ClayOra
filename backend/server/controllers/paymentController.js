@@ -4,7 +4,7 @@ const Cart = require("../models/Cart");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const User = require("../models/User");
-const { sendEmail } = require("../utils/email");
+const { sendEmail, sendOrderConfirmation } = require("../utils/email");
 const { quoteCart, reserveStock } = require("../services/checkout");
 
 const getDeliveryAddress = (deliveryAddress, buyer) => {
@@ -102,7 +102,16 @@ exports.verifyRazorpayPayment = async (req, res) => {
     await Cart.findOneAndUpdate({ user: req.user._id }, { $set: { items: [] } });
     // Payment feature: email failures are logged but never undo a verified customer payment.
     await order.populate("orderItems.product", "name");
-    notifySellersOfPaidOrder(order).catch((error) => console.error("Seller paid-order notification failed:", error.message));
+    const emailResults = await Promise.allSettled([
+      notifySellersOfPaidOrder(order),
+      sendOrderConfirmation({ order, customer: req.user }),
+    ]);
+    emailResults.forEach((result, index) => {
+      if (result.status === "rejected") console.error(
+        index === 0 ? "Seller paid-order notification failed:" : "Buyer paid-order confirmation failed:",
+        result.reason?.message
+      );
+    });
     res.json({ message: "Payment verified", orderId: order._id });
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message });

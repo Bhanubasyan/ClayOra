@@ -197,19 +197,33 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    const clientUrl = (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
+    const requestOrigin = String(req.get("origin") || "").replace(/\/$/, "");
+    const configuredClientUrl = String(process.env.CLIENT_URL || process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    // In production, never email a localhost link. The browser Origin is a safe
+    // fallback when the frontend URL was omitted or left at its local-dev value.
+    const clientUrl = configuredClientUrl && !(
+      process.env.NODE_ENV === "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredClientUrl)
+    ) ? configuredClientUrl : requestOrigin || "http://localhost:3000";
     const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your ClayOra password",
-      html: `<p>Hello ${user.name},</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 15 minutes.</p>`,
-    });
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your ClayOra password",
+        html: `<p>Hello ${String(user.name || "there").replace(/[<>&"']/g, "")},</p><p>We received a request to reset your ClayOra password.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This secure link expires in 15 minutes. If you did not request it, you can ignore this email.</p>`,
+      });
+    } catch (emailError) {
+      // Do not leave a usable reset token behind when delivery failed.
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+      throw emailError;
+    }
 
     res.json({ message: "If an account exists, a reset link has been sent." });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Unable to send reset email" });
+    console.error("Password reset email failed:", error.message);
+    res.status(503).json({ message: "Email service is not configured correctly. Please contact support or try again later." });
   }
 };
 

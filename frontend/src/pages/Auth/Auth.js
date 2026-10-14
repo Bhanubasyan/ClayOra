@@ -6,6 +6,8 @@ function Auth() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isForgot, setIsForgot] = useState(false);
   const [role, setRole] = useState("buyer");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,10 +69,14 @@ function Auth() {
  e.preventDefault();
  const email = e.target.email.value;
  try{
+  setForgotLoading(true);
+  setForgotMessage("");
   const {data} = await API.post("/auth/forgot-password", {email});
-  alert(data.message);
+  setForgotMessage(data.message || "If an account exists, a reset link has been sent.");
  }catch(error){
-  alert(error.response?.data?.message || "Sommething went wrong");
+  setForgotMessage(error.response?.data?.message || "Unable to send the reset link. Please try again.");
+ }finally{
+  setForgotLoading(false);
  }
   };
   return (
@@ -135,8 +141,10 @@ function Auth() {
               required
             />
 
-            <button type="submit">Send Reset Link</button>
+            <button type="submit" disabled={forgotLoading}>{forgotLoading ? "Sending..." : "Send Reset Link"}</button>
             </form>
+
+            {forgotMessage && <p className="forgot-message" role="status">{forgotMessage}</p>}
 
             <p className="switch-text" onClick={() => setIsForgot(false)}>
               Back to Login

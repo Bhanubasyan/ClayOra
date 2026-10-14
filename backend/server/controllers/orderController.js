@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const User = require("../models/User");
-const { sendEmail } = require("../utils/email");
+const { sendEmail, sendOrderConfirmation } = require("../utils/email");
 const mongoose = require("mongoose");
 const { quoteCart, reserveStock } = require("../services/checkout");
 
@@ -128,14 +128,23 @@ exports.createOrder = async (req, res) => {
 
     // A mail delivery problem should never undo a successfully placed order.
     await order.populate("orderItems.product");
-    notifySellersOfOrder(order).catch((error) =>
-      console.error("Seller order notification failed:", error.message)
-    );
+    const emailResults = await Promise.allSettled([
+      notifySellersOfOrder(order),
+      sendOrderConfirmation({ order, customer: req.user }),
+    ]);
+    emailResults.forEach((result, index) => {
+      if (result.status === "rejected") console.error(
+        index === 0 ? "Seller order notification failed:" : "Buyer order confirmation failed:",
+        result.reason?.message
+      );
+    });
 
     res.status(201).json(order);
 
   } catch (error) {
-    if (reservedItems.length) await Promise.all(reservedItems.map((item) => item.variantId ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { stock: item.quantity, "variants.$.stock": item.quantity } }) : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } }))).catch(() => {});
+    if (reservedItems.length) await Promise.all(reservedItems.map((item) => item.variantId
+      ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { "variants.$.stock": item.quantity } })
+      : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } }))).catch(() => {});
     console.error(error);
     res.status(error.statusCode || 500).json({ message: error.message });
   }
@@ -299,7 +308,9 @@ exports.cancelOrder = async (req, res) => {
     order.statusHistory.push({ status: "Cancelled", note: "Cancelled by customer" });
     await order.save();
     if (order.inventoryReserved) {
-      await Promise.all(order.orderItems.map((item) => item.variantId ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { stock: item.quantity, "variants.$.stock": item.quantity } }) : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } })));
+      await Promise.all(order.orderItems.map((item) => item.variantId
+        ? Product.updateOne({ _id: item.product, "variants._id": item.variantId }, { $inc: { "variants.$.stock": item.quantity } })
+        : Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } })));
       order.inventoryReserved = false;
       await order.save();
     }

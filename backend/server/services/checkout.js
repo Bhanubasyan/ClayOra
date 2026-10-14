@@ -57,20 +57,34 @@ const reserveStock = async (items) => {
   for (const item of items) {
     const productId = item.product._id || item.product;
     const variantId = item.variantId;
-    const filter = { _id: productId, stock: { $gte: item.quantity }, availability: "available" };
-    if (variantId) Object.assign(filter, { "variants._id": variantId, "variants.stock": { $gte: item.quantity } });
-    const increments = { stock: -item.quantity };
-    if (variantId) increments["variants.$.stock"] = -item.quantity;
+    const quantity = Number(item.quantity);
+
+    // Legacy products created before `availability` existed have no persisted value.
+    // Treat everything except an explicitly unavailable product as sellable, matching
+    // what Mongoose returns after applying the schema default.
+    const filter = { _id: productId, availability: { $ne: "unavailable" } };
+    const increments = {};
+    if (variantId) {
+      // A variant owns its inventory. Requiring/decrementing the parent stock as well
+      // caused valid variant orders to fail or reduce inventory twice.
+      filter.variants = { $elemMatch: { _id: variantId, stock: { $gte: quantity } } };
+      increments["variants.$.stock"] = -quantity;
+    } else {
+      filter.stock = { $gte: quantity };
+      increments.stock = -quantity;
+    }
     const product = await Product.findOneAndUpdate(
       filter,
       { $inc: increments },
       { new: true }
     );
     if (!product) {
-      await Promise.all(reserved.map((entry) => entry.variantId ? Product.updateOne({ _id: entry.productId, "variants._id": entry.variantId }, { $inc: { stock: entry.quantity, "variants.$.stock": entry.quantity } }) : Product.findByIdAndUpdate(entry.productId, { $inc: { stock: entry.quantity } })));
+      await Promise.all(reserved.map((entry) => entry.variantId
+        ? Product.updateOne({ _id: entry.productId, "variants._id": entry.variantId }, { $inc: { "variants.$.stock": entry.quantity } })
+        : Product.findByIdAndUpdate(entry.productId, { $inc: { stock: entry.quantity } })));
       const error = new Error("A product just went out of stock. Please review your cart."); error.statusCode = 409; throw error;
     }
-    reserved.push({ productId: product._id, variantId, quantity: item.quantity });
+    reserved.push({ productId: product._id, variantId, quantity });
   }
   return reserved;
 };
