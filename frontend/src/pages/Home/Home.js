@@ -321,7 +321,7 @@ const categories = [
 
         {/* SEARCH + FILTER */}
         <div className="filter-section">
-          <form onSubmit={handleSearch} className="search-bar">
+          <form onSubmit={handleSearch} className="search-bar" id="shop-search">
             <input
               type="text"
               placeholder="Search pottery..."
@@ -392,6 +392,7 @@ const categories = [
                   >
                     ♥
                   </button>
+                  <span className="product-card-category">{product.category || "Handmade"}</span>
                   <Link
                     to={`/product/${product._id}`}
                     className="product-link"
@@ -416,6 +417,18 @@ const categories = [
           )}
         </div>
       </div>
+
+      <section className="maker-story" aria-label="Meet the makers">
+        <div className="maker-story-inner">
+          <div className="maker-story-image"><img src={image4} alt="A warm collection of handmade craft pieces" loading="lazy" /></div>
+          <div className="maker-story-copy">
+            <span>Meet the makers</span>
+            <h2>Behind Every Craft,<br />There’s a Story.</h2>
+            <p>ClayOra brings independent Indian makers and thoughtful homes closer together. Every object carries the character of its material, its process, and the hands that shaped it.</p>
+            <Link to="/home">Explore their work <span aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+      </section>
 
       <section className="craft-story" aria-label="Our craft story">
         <div className="craft-story-pattern" aria-hidden="true">
